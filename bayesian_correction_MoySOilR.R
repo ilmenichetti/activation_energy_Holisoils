@@ -15,7 +15,6 @@ library(caret)
 #TODO plot the treatments for each A
 #TODO unit of A
 #TODO Q10?
-#TODO extrapolation to future?
 
 palette_treat <-  c(paletteer::paletteer_c("ggthemes::Orange-Gold", n=5),
                     paletteer::paletteer_c("ggthemes::Green", n=5),
@@ -67,6 +66,65 @@ dim(processed_data)
 
 dropped_levels<-levels(processed_data_filtered_preprocess$plot_id)[!levels(processed_data_filtered_preprocess$plot_id) %in% levels(droplevels(processed_data_filtered_preprocess$plot_id))]
 processed_data_filtered_preprocess$plot_id <- droplevels(processed_data_filtered_preprocess$plot_id)
+
+
+
+
+########### site micrometeorology
+
+png("./Figures/climatedata.png", height=2500, width = 2000, res=300)
+
+data = data.frame(Date = processed_data_filtered_preprocess$date,
+                  Site= processed_data_filtered_preprocess$site,
+                  Temperature = processed_data_filtered_preprocess$T1_soil,
+                  Moisture = processed_data_filtered_preprocess$Soil_moist * 100)
+
+sites <- levels(data_long$Site)
+capitalized_sites <- paste0(toupper(substr(sites, 1, 1)), substr(sites, 2, nchar(sites)))
+data$DateNumeric <- as.numeric(data$Date)
+extended_date_range <- seq(min(data$DateNumeric) - 30, max(data$DateNumeric) + 30, length.out = 300)
+
+par(mfrow=c(3,2), mar=c(2,5,1,1))
+for(i in 1:length(sites)){
+subset<-data[data$Site== sites[i],]
+# Remove NAs
+data_clean <- subset %>% filter(!is.na(Temperature))
+data_clean$DateNumeric <- as.numeric(data_clean$Date)
+
+# Calculate the 2D kernel density estimate
+dens_temp <- kde2d(data_clean$DateNumeric, data_clean$Temperature, n = 300, lims = c(range(extended_date_range), c(0,30)))
+dens_moist <- kde2d(data_clean$DateNumeric, data_clean$Moisture, n = 300, lims = c(range(extended_date_range), c(0,60)))
+
+custom_palette_temp <- colorRampPalette(c("white", "goldenrod1", "orangered", "red4"))(100)
+custom_palette_moist <- colorRampPalette(c("white", "cadetblue2", "dodgerblue", "darkblue"))(100)
+
+# Plot temperature density over time with extended date range
+image(dens_temp, xlab = "Date", ylab = "Temperature (°C)", main = "", axes = FALSE,
+      xlim = range(extended_date_range), col = custom_palette_temp, ylim=c(0,30))
+axis(1, at = seq(min(extended_date_range), max(extended_date_range), length.out = 10),
+     labels = as.Date(seq(min(extended_date_range), max(extended_date_range), length.out = 10), origin = "1970-01-01"))
+axis(2)
+legend("topright", paste("Temperature", capitalized_sites[i]), pch=NA, bty="n")
+if(i ==1){legend("topleft", "a)", pch=NA, bty="n")
+} else if (i == 2){legend("topleft", "c)", pch=NA, bty="n")
+    } else if (i == 3) {legend("topleft", "e)", pch=NA, bty="n")}
+box()
+
+# Plot moisture density over time with extended date range
+image(dens_moist, xlab = "Date", ylab = "Moisture (% vol)", main = "", axes = FALSE,
+      xlim = range(extended_date_range), col = custom_palette_moist, ylim=c(0,60))
+axis(1, at = seq(min(extended_date_range), max(extended_date_range), length.out = 10),
+     labels = as.Date(seq(min(extended_date_range), max(extended_date_range), length.out = 10), origin = "1970-01-01"))
+axis(2)
+legend("topright", paste("Moisture", capitalized_sites[i]), pch=NA, bty="n")
+if(i ==1){legend("topleft", "b)", pch=NA, bty="n")
+} else if (i == 2){legend("topleft", "d)", pch=NA, bty="n")
+} else if (i == 3) {legend("topleft", "f)", pch=NA, bty="n")}
+
+box()
+}
+
+dev.off()
 
 
 

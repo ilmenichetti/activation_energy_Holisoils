@@ -104,6 +104,8 @@ On a more limited subset (only Spain), we tested
 # Results
 
 ## Sites microclimate
+![Climatic parameters measured at the sites, plotted as data density of all measurements](../Figures/climatedata.png)
+
 
 
 ## Benchmark models and parametric model fit
