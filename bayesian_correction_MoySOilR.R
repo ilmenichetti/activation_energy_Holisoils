@@ -9,11 +9,8 @@ library(lubridate)
 library(readxl)
 library(caret)
 
-#TODO microclimatic plots
 #TODO is there an interaction between texture and the TMS calibration?
 #TODO distance between control and treatments
-#TODO plot the treatments for each A
-#TODO unit of A
 #TODO Q10?
 
 palette_treat <-  c(paletteer::paletteer_c("ggthemes::Orange-Gold", n=5),
@@ -311,7 +308,7 @@ par(mfrow=c(1,2))
 E_0_densities_indA_Moy <- list()
 E_0_box_indA_Moy <- list()
 plot( density(post_bytreat_indA_Moy$Ea[,1]), xlim=c(range(post_bytreat_indA_Moy$Ea)[1]*0.9, range(post_bytreat_indA_Moy$Ea)[2]*1.1),
-      ylim=c(0,0.03), xlab = expression('E'[0]), col=NA, main="Temperature scaling")
+      ylim=c(0,0.07), xlab = expression('E'[0]), col=NA, main="Temperature scaling")
 for(i in 1:stan_data$Tr){
   E_0_densities_indA_Moy[[i]] <- density(post_bytreat_indA_Moy$Ea[,i])
   E_0_box_indA_Moy[[i]] <- E_0_densities_indA_Moy[[i]]$x
@@ -358,7 +355,7 @@ for(i in 1:stan_data$Tr){
 amplitude_densities_indA_Moy <- list()
 amplitude_box_indA_Moy <- list()
 plot( density(post_bytreat_indA_Moy$amplitude[,1]), xlim=c(range(post_bytreat_indA_Moy$amplitude)[1]*0.9, range(post_bytreat_indA_Moy$amplitude)[2]*1.1),
-      ylim=c(0, 20), xlab = expression('amplitude'), col=NA, main="Seasonality scaling")
+      ylim=c(0, 70), xlab = expression('amplitude'), col=NA, main="Seasonality scaling")
 for(i in 1:stan_data$Tr){
   amplitude_densities_indA_Moy[[i]] <- density(post_bytreat_indA_Moy$amplitude[,i])
   polygon(amplitude_densities_indA_Moy[[i]], col=add.alpha(palette_treat[i],0.25), border = add.alpha(palette_treat[i],0.6))
@@ -377,7 +374,7 @@ par(mfrow=c(1,2))
 a_densities_indA_Moy <- list()
 a_box_indA_Moy <- list()
 plot(density(post_bytreat_indA_Moy$a[,1]), xlim=c(range(post_bytreat_indA_Moy$a)[1]*0.9, range(post_bytreat_indA_Moy$a)[2]*1.1),
-      ylim=c(0,0.95), xlab = "a", col=NA, main="Moisture scaling")
+      ylim=c(0,4.95), xlab = "a", col=NA, main="Moisture scaling")
 for(i in 1:stan_data$Tr){
   a_densities_indA_Moy[[i]] <- density(post_bytreat_indA_Moy$a[,i])
   polygon(a_densities_indA_Moy[[i]], col=add.alpha(palette_treat[i],0.4), border = add.alpha(palette_treat[i],0.8))
@@ -391,7 +388,7 @@ for(i in 1:stan_data$Tr){
 b_densities_indA_Moy <- list()
 b_box_indA_Moy <- list()
 plot( density(post_bytreat_indA_Moy$b[,1]), xlim=c(range(post_bytreat_indA_Moy$b)[1]*0.9, range(post_bytreat_indA_Moy$b)[2]*1.1),
-      ylim=c(0, 2.4), xlab = expression('b'), col=NA, main="Moisture scaling")
+      ylim=c(0, 4.4), xlab = expression('b'), col=NA, main="Moisture scaling")
 for(i in 1:stan_data$Tr){
   b_densities_indA_Moy[[i]] <- density(post_bytreat_indA_Moy$b[,i])
   polygon(b_densities_indA_Moy[[i]], col=add.alpha(palette_treat[i],0.25), border = add.alpha(palette_treat[i],0.6))
@@ -466,7 +463,7 @@ legend("bottomright", paste("R^2 =", round(summary(lm)$r.squared,3)), bty="n", p
 dev.off()
 
 
-# independent validation
+# independent validations
 
 
 dim(post_bytreat_indA_Moy$amplitude)
@@ -475,6 +472,39 @@ dim(post_bytreat_indA_Moy$Ea)
 dim(post_bytreat_indA_Moy$A)
 dim(post_bytreat_indA_Moy$a)
 dim(post_bytreat_indA_Moy$b)
+
+
+str(post_bytreat_indA_Moy)
+
+mean(post_bytreat_indA_Moy$amplitude)/
+mean(stan_data$resp) * 100
+
+library(dplyr)
+averaged_data <- as.data.frame(stan_data) %>%
+  group_by(treatment) %>%
+  summarise(
+    avg_resp = mean(resp, na.rm = TRUE),
+    avg_temp = mean(temp, na.rm = TRUE),
+    avg_M = mean(M, na.rm = TRUE)
+  )
+
+png("./Figures/Amplitude_ratio.png", width = 2000, height=2000, res=300)
+par(mar=c(12,5,2,2))
+barplot(colMeans(post_bytreat_indA_Moy$amplitude)/averaged_data$avg_resp*100,
+        names.arg = names_treats, las=2, col = palette_treat, ylab= "mean amplitude (as % of mean respiration)", ylim=c(0,15))
+box()
+dev.off()
+
+
+dim(post_bytreat_indA_Moy$res)
+dim(post_bytreat_indA_Moy$Ea)
+dim(post_bytreat_indA_Moy$A)
+
+### decomposition of the variance
+
+
+
+
 
 
 #load the model for forward runs
