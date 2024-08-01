@@ -166,6 +166,7 @@ summary(lm)
 abline(a=0, b=1, col="black", lty=2)
 legend("topright", levels(processed_data$treatment), bty="n", pch=1:15, col = palette_treat)
 legend("bottomright", paste("R^2 =", round(summary(lm)$r.squared,3)), bty="n", pch=NA, col = NA)
+legend("bottomleft", "a)", bty="n", pch=NA, col = NA)
 
 plot(predict(linear_model, newdata = validation_data), validation_data$CO2_flux_hour, ylab="predicted", xlab="observed", main="Multiple linear model",
     col=palette_treat[as.numeric(validation_data$treatment)], pch=as.numeric(validation_data$treatment), xlim=c(0,3), ylim=c(0,3))
@@ -173,6 +174,8 @@ lm<-lm(validation_data$CO2_flux_hour ~ predict(linear_model, newdata = validatio
 summary(lm)
 abline(a=0, b=1, col="black", lty=2)
 legend("bottomright", paste("R^2 =", round(summary(lm)$r.squared,3)), bty="n", pch=NA, col = NA)
+legend("bottomleft", "b)", bty="n", pch=NA, col = NA)
+
 dev.off()
 
 

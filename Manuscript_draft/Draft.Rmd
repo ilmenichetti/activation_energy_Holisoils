@@ -2,10 +2,14 @@
 title: "Draft"
 author: "Lorenzo Menichetti"
 date: "2024-07-04"
-output: html_document
-  # pdf_document:
+output: pdf_document
   #   citation_package: natbib
 bibliography: references.bib
+header-includes:
+   - \usepackage[utf8]{inputenc}
+   - \usepackage{textcomp}
+   - \usepackage{amsmath}
+   - \DeclareUnicodeCharacter{03C9}{$\omega$}  # Declare the Unicode character for omega
 ---
 
 ```{r setup, include=FALSE}
@@ -32,50 +36,58 @@ Within each of the control and thinned stands (n=8), we recorded the number of t
 ## Microclimatic variables
 We measured soil moisture and temperature using TMS data loggers version 4 (Wild et al., 2019), located at the extreme of the 2 m transect in each of the monitoring plots (Fig S1). These probes have three temperature sensors positioned at +15 cm, 2 cm and -6 cm relative to the soil surface, and a sensor that measures volumetric soil moisture based on time domain transmission to a depth of 6 cm. To convert the raw TMS measurements of soil moisture to volumetric soil water content, we used a calibration curve developed by Kopecký et al. (2021). For further modelling and since these sensors measure every 15 min, we extracted the soil temperature and soil moisture measurements closer to the time we measured soil respiration in the field.
 Soil physical-chemical analyses
-Chemical analyses were measured on 5 soil cores of 4 cm diameter separated 0.5 m to a depth of 10 cm along the 2m monitoring transect. The five soil cores were mixed into a composite sample per plot. The composite sample was sieved through a 5-mm mesh sieve in the field, stored at −20°C and then freeze-dried prior to laboratory analyses. The pH was measured in distilled water 1:10 (w/v). The carbon (C) and nitrogen (N) content of the soil was measured using an elemental analyser: C content was measured by sulfochromic oxidation (ISO 14235), and N content was estimated by sulfuric acid mineralization with the addition of selenium and sodium sulphate and conversion to ammonium ions (ISO 11261), which were measured with the Segmented Flow Analyzer (SFA) Skalar. Available phosphorus (P) was determined after extraction with malachite green according to the protocol by Ohno & Zibilske (1991). Bulk density was measured in each of the plots by collecting 3 soil cores of 6 cm diameter and 10 cm depth around the 2m transect that were mixed into a composite sample. Soil bulk density was determined by dividing the dry mass of the composite sample by the volume of the 3 cores, after removing the stones. Soil C stocks (g m2) were calculated by multiplying C concentration by bulk density and sampling depth.
+Chemical analyses were measured on 5 soil cores of 4 cm diameter separated 0.5 m to a depth of 10 cm along the 2m monitoring transect. The five soil cores were mixed into a composite sample per plot. The composite sample was sieved through a 5-mm mesh sieve in the field, stored at -20°C and then freeze-dried prior to laboratory analyses. The pH was measured in distilled water 1:10 (w/v). The carbon (C) and nitrogen (N) content of the soil was measured using an elemental analyser: C content was measured by sulfochromic oxidation (ISO 14235), and N content was estimated by sulfuric acid mineralization with the addition of selenium and sodium sulphate and conversion to ammonium ions (ISO 11261), which were measured with the Segmented Flow Analyzer (SFA) Skalar. Available phosphorus (P) was determined after extraction with malachite green according to the protocol by Ohno & Zibilske (1991). Bulk density was measured in each of the plots by collecting 3 soil cores of 6 cm diameter and 10 cm depth around the 2m transect that were mixed into a composite sample. Soil bulk density was determined by dividing the dry mass of the composite sample by the volume of the 3 cores, after removing the stones. Soil C stocks (g m2) were calculated by multiplying C concentration by bulk density and sampling depth.
 Microbial biomass
 The same five soil cores used for chemical analyses were used to estimate soil microbial biomass. To do that, we extracted Phospholipid fatty acids (PLFAs) following Šnajdr et al. (2008). Lipids were extracted using approximately 1g of dry soil with a mixture of chloroform:methanol:phosphate buffer (1:2:0.8) and separated by solid-phase extraction cartridges (HyperSep Silica SPE columns 200 mg/3 mL, Thermo Fisher Scientific). PLFAs were eluted using 2 mL of methanol. The selected fractions underwent to mild alkaline methanolysis and the methyl esters of PLFAs were analyzed by gas chromatography-mass spectrometry (GC-MS; 450-GC, 240-MS ion trap detector, Varian, Walnut Creek, CA). In the polar PLFA fraction, fungal biomass was quantified based on 18:2ω6,9 (fungal PLFA) content; bacterial biomass (total bacterial PLFA) was quantified as a sum of i14:0, i15:0, a15:0, 16:1ω5, 16:1ω7, 16:1ω9, 10Me-16:0, i16:0, i17:0, a17:0, cy17:0, 17:0, 10Me-17:0, 18:1ω7, 10Me-18:0, cy19:0 (Actinomycetes 10Me-16:0, 10Me-17:0, 10Me-18:0, Gram-positive i14:0, i15:0, a15:0, i16:0, i17:0, a17:0 and Gram-negative 16:1ω7, 16:1ω9, 18:1ω7, cy17:0, cy19:0). The sum of all of the selected PLFAs together with 16:0 and 18:1w9 was used as an estimate of total microbial biomass (total PLFA). 
 
 
-## Data analysis
+## Data pretreatment
 
 
 ## Validation
-In order to ensure a robust validation, all models have been validated with a split approach, keeping two completely independent data sets (80% of the points for training and 20% validation).
+In order to ensure a robust validation, all models have been validated with a split approach, keeping two completely independent data sets (80% of the points for training and 20% validation). Given the size of the dataset, we considered this approach more reliable than any crossvalidation approach.
 
 
 ## Parametric model
 We defined a parametric model to consider all the three effects on respiration we hypothesized. The first is the influence of temperature, then the influence of soil moisture, and then a seasonal component which is assumed to be roughly proportional to the interactions of autotrophic respiration (which we hypothesized following a seasonal pattern).
 Temperature and moisture scaling interact linearly, while seasonality was assumed additive:  
 $$
-Rh(t) =  \xi_{temp(t,j)} \cdot \xi_{moist(t,j)} + \xi_{sin(t,j)}
+Rh(t) =  \xi_{temp(t,j, k)} \cdot \xi_{moist(t,j)} + \xi_{sin(t,j)}
 $$
 
-
-Where the index $j$ corresponds to the treatments and the index $k$ corresponds to the plots (minimal statistical unit), while $(t)$ denotes the variation over time of each forcing variable (temperature, moisture, or days of the year)
+Where the index $j$ corresponds to the treatments and the index $k$ corresponds to the plots (minimal statistical unit), while $(t)$ denotes the variation over time of each forcing variable (temperature, moisture, or days of the year).
 
 ## Model calibration
-The parametric model was calibrated in a stratified Bayesian framework, where we assigned independent parameters depending on different groping of the data.  
-The model was written in Stan [@carpenter2017stan; @standev2018stancore], run from its R interface [@Rstan]
-
-
+The parametric model was calibrated in a stratified Bayesian framework, where we assigned independent parameters depending on different groping of the data.   
+The model was written in Stan [@carpenter2017stan; @standev2018stancore], run from its R interface [@Rstan].
+The likelihood function was defined as:  
+$$
+    Rh_{meas} \sim \mathcal{N}(Rh_{sim}, \sigma)
+$$
+Where the parameter $\sigma$ was defined as the variance of the whole dataset (0.27).
 
 ### Moisture 
-The moisture scaling function had to be taken from a simplified version of Moyano (2013) in the SoilR package [@SierraMueller].
+The moisture scaling function was taken from a simplified version of Moyano (2013) in the SoilR package [@SierraMueller].
 $$
 \xi_{moist(t,k)} = a_j \cdot \theta_{v}(t) - b_j \cdot (\theta_{v}(t))^2
 $$
-Variance is by treatment.
+We assumed that the variability in moisture sensitivity is driven by treatments ($j$). 
+The prior distribution for the term $a$ was assumed as $\sim \mathcal{N}(3.11, 0.1)$ and for the term $b$ was assumed as $\sim \mathcal{N}(2.42, 0.1)$, utilizing as mean values the values in @SierraMueller and setting up conservatives standard deviations.
 
-
+  
 ### Temperature
-The temperature scaling function assumes an independent activation energy $E_a$ varying by treatments $j$:
+The temperature scaling function we utilized to define the relationship is the one defined by @Lloyd.1994l68 and it is derived from the original Arrhenius equation [Arrhenius.1889]:
 $$
 \xi_{temp(t,j)} = A_{k} \cdot e^{\frac{-Ea_j}{(T(t)+273.15)-T_0)}}
 $$
-The two parameters $E_a$ and $T_0$ are represented by Bayesian priors.  
+The two parameters $A_{k}$ and $E_a$ are represented by Bayesian priors.  
+For the temperature scaling we assumed that the activation energy term $E_a$ (which defines roughly the slope of the relationship) is driven by treatments ($j$) while the linear rescaling term $A_{k}$ is driven by the substrate at the single plot level ($k$). This because substrate (organic matter) amount is usually highly variable in soil even at small spatial scales, while its quality, which defines its temperature sensitivity, is assumed to follow the inputs quality which are relatively uniform over each treatments.  
+The effect of the rescaling term $A_{k}$ is included in the function for temperature scaling to keep the convention of the original formulation of the equation, but it could be brought outside since it just a linear interaction.  
+The prior distribution for the term $A$ was assumed as $\sim \mathcal{N}(300, 100)$ and for the term $E_a$ was assumed as $\sim \mathcal{N}(398.5, 50)$, utilizing as mean values the values  in @Lloyd.1994l68 and setting up conservatives standard deviations.
+
 
 ### Seasonality
+In order to correct for eventual seasonality patters, we introduce also a seasonality scaling.
 The seasonality scaling functions assume a sine function with period = 365 days, with both amplitude $ampl_j$ (the magnitude) and peak day $peak_j$ (when the function is at its only annual peak) varying as a function of treatments:
 $$
 \begin{aligned}
@@ -84,56 +96,70 @@ $$
 \end{aligned}
 $$
 Both the terms $ampl_j$ and $peak_j$ are described by Bayesian priors. Variance is by treatment.
-
-
-
+We assumed that the variability in seaslonalityis driven by treatments ($j$). 
+The prior distribution for the term $ampl$ was assumed as $\sim \mathcal{N}(0, 0.5)$, so assuming as mean no seasonality effect, and for the term $peak$ was assumed as $\sim \mathcal{N}(175, 50)$, so assuming as mean for the peak the 24th of June (Midsummer day).
 
 
 ## Model benchmark
+The parametric model has been compared against two nonparametric machine learning models. The firs was a more conventional multiple linear regression model (default R package `lm`, @R-Core-Team_2023), and the second a random forest model (command `randomForest` from package `randomForest`, @randomForest_2021). Both models had the structure as:  
+$$
+Rh(t) \sim f(T(t), theta_v(t), treatment)
+$$
+The rationale behind these choices is to offer two extremes to compare the fitness of our parametric model with, assuming that a linear regression model will perform more poorly than the parametric model given its limited capabilities to represent relationships more complex than linear (as we assume temperature and moisture relationships with respiration), and that a random forest model will perform better than the parametric model given its plasticity. The random forest model was in this case fit with default parameters, without any other optimization.
 
+## Model extrapolation of increased temperature effect on decomposition
+Once we calibrated our parametric model, we could test the consequences of an increase in temperature on decompiosition by driving the model with the same dataset except temperature was increased by 5&deg;C. This resulted in a more immediate way of visualizing the impact of a different temperature sensitivity of organic material.
 
-## Model extrapolation
-Once we calibrated our parametric model, we could test the consequences of an increase in 5&deg;C
 
 ## Machine learning variance decomposition
-On a more limited subset (only Spain), we tested  
-
-
+On a more limited subset (only Spain), we tested a more extensive random forest model in order to test the predictive power of other variables on the respiration. The model had structure as:  
+$$
+\begin{aligned}
+Rh(t) \sim f(trees, DBH, BD, por, pH, P, N_{tot}, C{tot}, biom_{fungi}, biom_{bact}, \\
+biom_{act}, biom_{gram+}, biom_{gram-}, biom_{tot}, T(t), theta_v(t), treatment)
+\end{aligned}
+$$
+We included in this model tree density in plants ha$^{-1}$ ($trees$), average diameter at breast height ($DBH$), bulk density ($BD$), porosity ($por$), pH, phosophorous ($P$), total nitrogen ($N_{tot}$), total carbon ($C_{tot}$), fungal biomass ($biom_{fungi}$), bacterial biomass ($biom_{bact}$), actinomycetes biomass ($biom_{act}$), gram+ bacterial biomass ($biom_{gram+}$), gram- bacterial biomass ($biom_{gram-}$), total biomass ($biom_{tot}$), as well as variables mentioned above.
+The aim of this model was to test the predictive potential of any of these additional variables, to explore eventual correlations and possible related processes. The choice of a random forest model over a more conventional linear model is motivated by the capacity of the former to consider more complex relationships and interactions, on top of the convenience of being able to assess quantitatively the predictive potential of each variable by estimating relative variable importance.
 
 
 
 # Results
 
 ## Sites microclimate
-![Climatic parameters measured at the sites, plotted as data density of all measurements. Not all times series cover the same period of time.](../Figures/climatedata.png){width=60%}
+![Climatic parameters measured at the sites, plotted as data density of all measurements. Please notice thot not every time series covers the same period of time.](../Figures/climatedata.png){width=60%}
 
 
 
 ## Benchmark models and parametric model fit
 
-![Alt text](../Figures/fit_ML_validation.png){width=80%}
+![Fit of the two benchmark machine learning models, linear (a) and random forest (b)](../Figures/fit_ML_validation.png){width=80%}
 
 
 
-![Alt text](../Figures/fit_model_validation.png){width=60%}
+![Fit of the parametric model](../Figures/fit_model_validation.png){width=60%}
 
 
 ## Parametric model posteriors 
 
-![Alt text](../Figures/posteriors_boxplots.png){width=60%}
+![Posteriors of the parameters varying as a function of treatments](../Figures/posteriors_boxplots.png){width=60%}
 
-![Alt text](../Figures/posteriors_boxplots_A.png){width=60%}
+![Posteriors of the scaling parameter, varying as a function of single plots](../Figures/posteriors_boxplots_A.png){width=60%}
 
 
 
 ## Machine learning variance decomposition
 
-![Alt text](../Figures/variance_decomposition.png){width=60%}
+![Fit of the detailed random forest model (a) and variable importance of the same model (b)](../Figures/variance_decomposition.png){width=60%}
+
+
 
 ## Model extrapolations
 
-![Alt text](../Figures/scenario_extrapolation.png){width=60%}
+![Sensitivity of the organic matter in different treatments to a 5&deg;C increase in temperature, expressed as increase in mineralization from the baseline temperature](../Figures/scenario_extrapolation.png){width=60%}
 
+
+# Discussion
 
 
 # Conclusions
@@ -147,12 +173,12 @@ On a more limited subset (only Spain), we tested
 
 # Appendix
 
-![Alt text](../Figures/posteriors_temp.png)
+![Posteriors of the parameters of the temperature function, plotted as density distributions](../Figures/posteriors_temp.png)
 
 
-![Alt text](../Figures/posteriors_seasonality.png)
+![Posteriors of the parameters of the moisture function, plotted as density distributions](../Figures/posteriors_seasonality.png)
 
 
-![Alt text](../Figures/posteriors_moisture.png)
+![Posteriors of the parameters of the seasonality function, plotted as density distributions](../Figures/posteriors_moisture.png)
 
 
