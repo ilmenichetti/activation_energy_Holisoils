@@ -3,8 +3,8 @@ title: "The impact of forest management on the temperature sensitivity of organi
 author: "Leticia Perez-Izquiero, Lorenzo Menichetti, Jorge Curiel-Juste, etc"
 date: "2024-07-04"
 output:
-  bookdown::pdf_document2: default
   bookdown::html_document2: default
+  bookdown::pdf_document2: default
   #output: pdf_document
   #   citation_package: natbib
 bibliography: references.bib
@@ -24,6 +24,14 @@ TEST CHANGE
 
 
 # Introduction
+
+
+## Soil C turnover is controlled by temperature and moisture
+
+## Climate change will influence soil C turnover globally
+
+
+
 
 # Material and methods
 
@@ -132,7 +140,8 @@ The aim of this model was to test the predictive potential of any of these addit
 # Results
 
 ## Sites microclimate
-![Climatic parameters measured at the sites, plotted as data density of all measurements. Please notice thot not every time series covers the same period of time.](../Figures/climatedata.png){width=60%}
+<!-- ![Climatic parameters measured at the sites, plotted as data density of all measurements. Please notice thot not every time series covers the same period of time.](../Figures/climatedata.png){width=60%} -->
+![Climatic parameters and respirations measured at the sites (mean values after loess interpolation with span = 0.5). Please notice thot not every time series covers the same period of time. Red shades = France, green shades = Romania, blue shades = Spain](../Figures/climatedata_means.png){width=60%}
 
 
 
