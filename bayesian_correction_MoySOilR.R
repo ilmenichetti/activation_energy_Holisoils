@@ -9,29 +9,23 @@ library(lubridate)
 library(readxl)
 library(caret)
 library(MASS)
+library(parallel)
 
 #TODO DISCUSSION is there an interaction between texture and the TMS calibration?
 #TODO Q10?
 
 #TODO normalization of respiration by SOC when data are there
+#TODO convert volumetric water content to theta_s?
 
 #DONE interpolated line of temperature by treatment (average)
 #DONE add the same graph for respiration
 #DONE try to make them side by side by site (3 plots)
 
-#TODO plot the reduction functions in appendix
+#DONE plot the reduction functions in appendix
 
-#TODO reorder the treatments with control first
-#TODO treatments control thinning clearcut with different shades, and slah with 45 degrees lines
+#DONE reorder the treatments with control first
+#DONE in the boxplots treatments control thinning clearcut with different shades, and slah with 45 degrees lines
 
-
-palette_treat <-  c(paletteer::paletteer_c("ggthemes::Orange-Gold", n=5),
-                    paletteer::paletteer_c("ggthemes::Green", n=5),
-                    paletteer::paletteer_c("ggthemes::Blue-Teal", n=5))
-
-palette_plot <-  c(paletteer::paletteer_c("ggthemes::Orange-Gold", n=length(unique(data[data$site=="france",]$plot_ID))),
-                   paletteer::paletteer_c("ggthemes::Green", n=length(unique(data[data$site=="romania",]$plot_ID))),
-                   paletteer::paletteer_c("ggthemes::Blue-Teal", n=length(unique(data[data$site=="spain",]$plot_ID))))
 
 
 
@@ -47,6 +41,25 @@ data$seq <- 1:dim(data)[1]
 
 
 data$Date <- as.Date(data$Date, format = "%d.%m.%Y")
+
+#rearrange the levels putting control first
+data$treatment <- factor(data$treatment, levels = c("control", "clear_cut_no_slash", "clear_cut_slash", "thinning_no_slash", "thinning_slash"))
+
+
+
+
+palette_treat <-  c(paletteer::paletteer_c("ggthemes::Orange-Gold", n=5),
+                    paletteer::paletteer_c("ggthemes::Green", n=5),
+                    paletteer::paletteer_c("ggthemes::Blue-Teal", n=5))
+palette_treat_simplified <- c(palette_treat[1], palette_treat[3], palette_treat[3], palette_treat[5], palette_treat[5],
+                              palette_treat[6], palette_treat[8], palette_treat[8], palette_treat[10], palette_treat[10],
+                              palette_treat[11], palette_treat[13], palette_treat[13], palette_treat[15], palette_treat[15])
+
+
+palette_plot <-  c(paletteer::paletteer_c("ggthemes::Orange-Gold", n=length(unique(data[data$site=="france",]$plot_ID))),
+                   paletteer::paletteer_c("ggthemes::Green", n=length(unique(data[data$site=="romania",]$plot_ID))),
+                   paletteer::paletteer_c("ggthemes::Blue-Teal", n=length(unique(data[data$site=="spain",]$plot_ID))))
+
 
 
 processed_data <- data.frame(ID = data$seq,
@@ -64,10 +77,9 @@ processed_data <- data.frame(ID = data$seq,
 
 
 
-
 # Filter out rows with NAs in the first 8 columns, ignore NAs in the last 4 columns
 processed_data_filtered_preprocess <- processed_data %>%
-  filter(rowSums(is.na(select(., 3:8))) == 0)
+  filter(rowSums(across(3:8, ~ is.na(.))) == 0)
 
 dim(processed_data_filtered_preprocess)
 dim(processed_data)
@@ -75,7 +87,7 @@ dim(processed_data)
 dropped_levels<-levels(processed_data_filtered_preprocess$plot_id)[!levels(processed_data_filtered_preprocess$plot_id) %in% levels(droplevels(processed_data_filtered_preprocess$plot_id))]
 processed_data_filtered_preprocess$plot_id <- droplevels(processed_data_filtered_preprocess$plot_id)
 
-
+levels(processed_data_filtered_preprocess$treatment)
 
 
 ########### site micrometeorology
@@ -108,17 +120,17 @@ custom_palette_moist <- colorRampPalette(c("white", "cadetblue2", "dodgerblue", 
 
 average_temperatures <- tapply(data_clean$Temperature, data_clean$DateNumeric, mean, na.rm = TRUE)
 average_temperatures_df <- data.frame(DateNumeric = as.numeric(names(average_temperatures)), AverageTemperature = as.numeric(average_temperatures))
-loess_model_temp <- loess(AverageTemperature ~ DateNumeric, data = average_temperatures_df, span = 0.25)
+loess_model_temp <- loess(AverageTemperature ~ DateNumeric, data = average_temperatures_df)
 date_seq_temp <- seq(min(data_clean$DateNumeric), max(data_clean$DateNumeric), by = 1)
 predicted_temperatures <- predict(loess_model_temp, newdata = data.frame(DateNumeric = date_seq_temp))
-interpolated_df_temp <- data.frame(DateNumeric = date_seq, InterpolatedTemperature = predicted_temperatures)
+interpolated_df_temp <- data.frame(DateNumeric = date_seq_temp, InterpolatedTemperature = predicted_temperatures)
 
 average_moisture <- tapply(data_clean$Moisture, data_clean$DateNumeric, mean, na.rm = TRUE)
 average_moisture_df <- data.frame(DateNumeric = as.numeric(names(average_moisture)), AverageMoisture = as.numeric(average_moisture))
-loess_model_moist <- loess(AverageMoisture ~ DateNumeric, data = average_moisture_df, span = 0.25)
+loess_model_moist <- loess(AverageMoisture ~ DateNumeric, data = average_moisture_df)
 date_seq_moist <- seq(min(data_clean$DateNumeric), max(data_clean$DateNumeric), by = 1)
 predicted_moisture <- predict(loess_model_moist, newdata = data.frame(DateNumeric = date_seq_moist))
-interpolated_df_moist <- data.frame(DateNumeric = date_seq, InterpolatedMoisture = predicted_moisture)
+interpolated_df_moist <- data.frame(DateNumeric = date_seq_temp, InterpolatedMoisture = predicted_moisture)
 
 
 # Plot temperature density over time with extended date range
@@ -257,14 +269,14 @@ dev.off()
 set.seed(123) # Set seed for reproducibility
 
 # Create stratification group
-strat_group <- interaction(processed_data_filtered$gen_treatment, processed_data_filtered$country)
+strat_group <- interaction(processed_data_filtered_preprocess$gen_treatment, processed_data_filtered_preprocess$country)
 
 # Create stratified partition
 train_indices <- createDataPartition(strat_group, p = 0.8, list = FALSE)
 
 # Split the data into training and validation sets
-processed_data_filtered <- processed_data_filtered[train_indices, ]
-validation_data <- processed_data_filtered[-train_indices, ]
+processed_data_filtered <- processed_data_filtered_preprocess[train_indices, ]
+validation_data <- processed_data_filtered_preprocess[-train_indices, ]
 
 dim(validation_data)
 dim(processed_data_filtered)
@@ -321,7 +333,7 @@ stan_data <- list(N = length(processed_data_filtered$CO2_flux_hour),
                   temp = processed_data_filtered$T1_soil,
                   M = processed_data_filtered$Soil_moist,
                   Pl = length(levels(processed_data_filtered$plot_id)),
-                  plot_id = as.numeric(processed_data_filtered$plot_id),
+                  plot_id = as.integer(processed_data_filtered$plot_id),
                   day_year = yday(as.Date(processed_data_filtered$date))
 )
 
@@ -332,26 +344,33 @@ stan_data_valid <- list(N = length(validation_data$CO2_flux_hour),
                   temp = validation_data$T1_soil,
                   M = validation_data$Soil_moist,
                   Pl = length(levels(validation_data$plot_id)),
-                  plot_id = as.numeric(validation_data$plot_id),
+                  plot_id = as.integer(validation_data$plot_id),
                   day_year = yday(as.Date(validation_data$date))
 )
 
+#quick check of the data...
+str(stan_data)
 
 # define the number of runs of the MCMC
 N_RUNS = 5000
 
-str(stan_data)
+# Determine the number of cores available
+num_cores <- detectCores()
 
-# fitting the model
+# fitting the model (in multicore mode)
 start <- Sys.time()
-fit_bytreat_indA_Moy_sin <- stan(file = 'temp_moist_season_model.stan',
-                                 data = stan_data,
-                                 iter = N_RUNS,
-                                 chains = 10,
-                                 control = list(adapt_delta = 0.99, max_treedepth = 15))
+fit_bytreat_indA_Moy_sin <- stan(
+  file = 'temp_moist_season_model.stan',
+  data = stan_data,
+  iter = N_RUNS,
+  chains = 10,
+  cores = num_cores-1,  # Use all available cores
+  control = list(adapt_delta = 0.99, max_treedepth = 15)
+)
 end <- Sys.time()
 tot_time <- end - start
 tot_time
+
 
 #post_bytreat_indA_Moy <- extract(fit_bytreat_indA_Moy)
 post_bytreat_indA_Moy <- extract(fit_bytreat_indA_Moy_sin)
@@ -529,11 +548,35 @@ for(i in 1:stan_data$Tr){
 dev.off()
 
 
+levels(processed_data_filtered$treatment)
+
+names_treats <- c( "control France", "CC no-slash France", "CC slash France", " thin no-slash France", " thin slash France",
+                   "control Romania", "CC no-slash Romania", "CC slash Romania", " thin no-slash Romania"," thin slash Romania",
+                   "control Spain", "CC no-slash Spain", "CC slash Spain", " thin no-slash Spain", " thin slash Spain")
 
 
-names_treats <- c("CC no-slash France", "CC slash France", "control France", " thin no-slash France", " thin slash France",
-"CC no-slash Romania", "CC slash Romania", "control Romania", " thin no-slash Romania"," thin slash Romania",
-"CC no-slash Spain", "CC slash Spain", "control Spain", " thin no-slash Spain", " thin slash Spain")
+angle_palette = rep(c(NA, NA, 45, NA, 45), 3)
+density_palette = rep(c(NA, NA, 20, NA, 20), 3)
+
+# define a custom function to add the shading to the boxplots
+add_shading_to_boxplot <- function(bp, density, angle, x_offset = 0.4) {
+  # Loop through each box in the boxplot
+  for (i in 1:ncol(bp$stats)) {
+    # Check if density and angle are not NA
+    if (!is.na(density[i]) && !is.na(angle[i])) {
+      # Calculate the positions for shading
+      xleft <- i - x_offset  # left x position for shading
+      xright <- i + x_offset # right x position for shading
+      ybottom <- bp$stats[2, i]  # lower hinge (25th percentile)
+      ytop <- bp$stats[4, i]     # upper hinge (75th percentile)
+
+      # Add shading using the rect function with angle and density
+      rect(xleft, ybottom, xright, ytop,
+           density = density[i], angle = angle[i],
+           col = "black", border = NA)
+    }
+  }
+}
 
 
 png("./Figures/posteriors_boxplots.png", height = 3000, width = 3000, res= 300)
@@ -551,21 +594,27 @@ layout_matrix <- matrix(c(
 
 # Set up the layout
 layout(layout_matrix)
-boxplot(E_0_box_indA_Moy, names = names_treats, las=2, col = palette_treat, main = expression(E[0]))
+
+bp <- boxplot(E_0_box_indA_Moy, names = names_treats, las=2, col = palette_treat_simplified, main = expression(E[0]))
+add_shading_to_boxplot(bp, density = density_palette, angle = angle_palette)
 legend("topright", "(a)", pch=NA, bty="n")
-boxplot(peak_box_indA_Moy, names = names_treats, las=2, col = palette_treat, main = "peak")
+bp <- boxplot(peak_box_indA_Moy, names = names_treats, las=2, col = palette_treat_simplified, main = "peak")
+add_shading_to_boxplot(bp, density = density_palette, angle = angle_palette)
 legend("topright", "(b)", pch=NA, bty="n")
-boxplot(amplitude_box_indA_Moy, names = names_treats, las=2, col = palette_treat, main = "amplitude")
+bp <- boxplot(amplitude_box_indA_Moy, names = names_treats, las=2, col = palette_treat_simplified, main = "amplitude")
+add_shading_to_boxplot(bp, density = density_palette, angle = angle_palette)
 legend("topright", "(c)", pch=NA, bty="n")
-boxplot(a_box_indA_Moy, names = names_treats, las=2, col = palette_treat, main = "a")
+bp <- boxplot(a_box_indA_Moy, names = names_treats, las=2, col = palette_treat_simplified, main = "a")
+add_shading_to_boxplot(bp, density = density_palette, angle = angle_palette)
 legend("topright", "(d)", pch=NA, bty="n")
-boxplot(b_box_indA_Moy, names = names_treats, las=2, col = palette_treat, main = "b")
+bp <- boxplot(b_box_indA_Moy, names = names_treats, las=2, col = palette_treat_simplified, main = "b")
+add_shading_to_boxplot(bp, density = density_palette, angle = angle_palette)
 legend("topright", "(e)", pch=NA, bty="n")
 dev.off()
 
 png("./Figures/posteriors_boxplots_A.png", height = 1500, width = 3500, res= 300)
 par(mar=c(6,3,1.5,0))
-boxplot(A_box_indA_Moy, names = levels(processed_data_filtered$plot_id), las=2, col = palette_plot, main = "A", cex.axis =0.5)
+bp <- boxplot(A_box_indA_Moy, names = levels(processed_data_filtered$plot_id), las=2, col = palette_plot, main = "A", cex.axis =0.5)
 dev.off()
 
 # Rhat
@@ -616,10 +665,33 @@ averaged_data <- as.data.frame(stan_data) %>%
     avg_M = mean(M, na.rm = TRUE)
   )
 
+# custom function to add the shading to the barplots
+add_shading_to_barplot <- function(bar_positions, bar_heights, density, angle, x_offset = 0.5, col = "black") {
+  # Loop through each bar in the barplot
+  for (i in 1:length(bar_positions)) {
+    # Check if density and angle are not NA
+    if (!is.na(density_palette[i]) && !is.na(angle_palette[i])) {
+      # Calculate the positions for shading
+      xleft <- bar_positions[i] - x_offset  # left x position for shading
+      xright <- bar_positions[i] + x_offset # right x position for shading
+      ybottom <- 0  # bottom of the bar (assumed to be at y=0)
+      ytop <- bar_heights[i]  # top of the bar
+
+      # Add shading using the rect function with angle and density
+      rect(xleft, ybottom, xright, ytop,
+           density = density_palette[i], angle = angle_palette[i],
+           col = col, border = NA)
+    }
+  }
+}
+
+
 png("./Figures/Amplitude_ratio.png", width = 2000, height=2000, res=300)
 par(mar=c(12,5,2,2))
-barplot(colMeans(post_bytreat_indA_Moy$amplitude)/averaged_data$avg_resp*100,
-        names.arg = names_treats, las=2, col = palette_treat, ylab= "mean amplitude (as % of mean respiration)", ylim=c(0,15))
+bar_positions <-barplot(colMeans(post_bytreat_indA_Moy$amplitude)/averaged_data$avg_resp*100,
+        names.arg = names_treats, las=2, col = palette_treat_simplified, ylab= "mean amplitude (as % of mean respiration)", ylim=c(0,40))
+add_shading_to_barplot(bar_positions = bar_positions, bar_heights = colMeans(post_bytreat_indA_Moy$amplitude)/averaged_data$avg_resp*100,
+                      density = density_palette, angle = angle_palette)
 box()
 dev.off()
 
@@ -932,5 +1004,6 @@ plot(modeled_extrapolations,
 temp_effect = modeled_extrapolations -  modeled_zero
 png("./Figures/scenario_extrapolation.png", height=1800, width = 2000, res = 300)
 par(mar=c(12,4,2,2))
-boxplot(temp_effect ~ stan_data$treatment, names = names_treats, las=2, col = palette_treat, main = "Climate change vulnerability", ylab= "increase in mineralization", xlab="")
+bp <- boxplot(temp_effect ~ stan_data$treatment, names = names_treats, las=2, col = palette_treat_simplified, main = "Climate change vulnerability", ylab= "increase in mineralization", xlab="")
+add_shading_to_boxplot(bp, density = density_palette, angle = angle_palette)
 dev.off()

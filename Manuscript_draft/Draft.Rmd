@@ -150,7 +150,6 @@ The aim of this model was to test the predictive potential of any of these addit
 ![Fit of the two benchmark machine learning models, linear (a) and random forest (b)](../Figures/fit_ML_validation.png){width=80%}
 
 
-
 ![Fit of the parametric model](../Figures/fit_model_validation.png){width=60%}
 
 
@@ -216,3 +215,12 @@ Any other variable than soil temperature and moisture did not seem to play a piv
 
 
 
+
+![Temperature scaling function](../Figures/Temp.png){width=50%}
+
+
+![Moisture scaling function](../Figures/Moist.png){width=50%}
+
+
+
+![Seasonality scaling function](../Figures/Season.png){width=50%}

@@ -20,12 +20,11 @@ transformed data {
 parameters {
   vector<lower=0>[Pl] A;           // Log of the pre-exponential factor
   vector<lower=0>[Tr] Ea;          // Ea/R for each treatment
-  // real<lower=0> sigma;             // Standard deviation of the residuals
 
-  vector<lower=3.11*0.5, upper=3.11*1.5>[Tr] a;    // scaling of MOyano function (simplified)
-  vector<lower=2.42*0.5, upper=2.42*1.5>[Tr] b;     // scaling of MOyano function (simplified
+  vector<lower=3.11*0.25, upper=3.11*1.75>[Tr] a;    // scaling of MOyano function (simplified)
+  vector<lower=2.42*0.25, upper=2.42*1.75>[Tr] b;     // scaling of MOyano function (simplified
 
-  vector<lower=0, upper =3>[Tr] amplitude;   // Amplitude for each treatment
+  vector<lower=0, upper=0.5>[Tr] amplitude;   // Amplitude for each treatment
   vector<lower=0, upper=365>[Tr] peak_day;  // Peak day for each treatment
 
 }
@@ -40,12 +39,11 @@ model {
   // Model prediction
   for (i in 1:N) {
     xi_moist[i] =   a[treatment[i]] * M[i] - b[treatment[i]] * M[i]^2;
-    xi_temp[i] = A[plot_id[i]] * (exp(-Ea[treatment[i]] / ((temp[i] + 273.15) - T_0)));
+    xi_temp[i] = A[plot_id[i]]*(exp(-Ea[treatment[i]] / ((temp[i] + 273.15) - T_0)));
     sine_wave[i] = amplitude[treatment[i]] * cos((2 * pi() / 365) * day_year[i] + (2 * pi() / 365) * (peak_day[treatment[i]] - 1) - pi() / 2);
     model_resp[i] = sine_wave[i] +  (xi_temp[i] * xi_moist[i]);
     }
 
-  // Priors
   // Priors
   A ~ normal(300, 100);
   Ea ~ normal(398.5, 50);
@@ -54,6 +52,7 @@ model {
   amplitude ~ uniform(0, 0.5);
   peak_day ~ normal(175, 50); #centered on the 24th of June
 
+  // sigma ~ normal(0, 1);
 
   // Likelihood
   resp ~ normal(model_resp, sigma);
@@ -71,7 +70,7 @@ generated quantities {
   // Model prediction
   for (i in 1:N) {
     xi_moist[i] =   a[treatment[i]] * M[i] - b[treatment[i]] * M[i]^2;
-    xi_temp[i] = A[plot_id[i]] * (exp(-Ea[treatment[i]] / ((temp[i] + 273.15) - T_0)));
+    xi_temp[i] = A[plot_id[i]]*(exp(-Ea[treatment[i]] / ((temp[i] + 273.15) - T_0)));
     sine_wave[i] = amplitude[treatment[i]] * cos((2 * pi() / 365) * day_year[i] + (2 * pi() / 365) * (peak_day[treatment[i]] - 1) - pi() / 2);
     model_resp[i] = sine_wave[i] +  (xi_temp[i] * xi_moist[i]);
     res[i] = model_resp[i] - resp[i];
