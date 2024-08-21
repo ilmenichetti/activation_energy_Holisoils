@@ -1,6 +1,6 @@
 ---
-title: "The impact of forest management on the temperature sensitivity of organic matter"
-author: "Leticia Perez-Izquiero, Lorenzo Menichetti, Jorge Curiel-Juste, etc"
+title: "The impact of forest management on the temperature sensitivity of organic matter turnover"
+author: "Leticia Pérez-Izquiero, Lorenzo Menichetti, Jorge Curiel-Juste, etc"
 date: "2024-07-04"
 output:
   bookdown::html_document2: default
@@ -24,14 +24,15 @@ TEST CHANGE
 
 
 # Introduction
-
+The soil is one of the largest terrestrial reservoirs of carbon, containing approximately three times more carbon than the atmosphere or the vegetation on Earth (IPCC, 2021). Soil carbon is released to the atmosphere as carbon dioxide (CO₂) through decomposition of organic matter by microbes (heterotrophic respiration) and root respiration (autotrophic respiration). This process, i.e., soil respiration, constitutes the main carbon efflux into the atmosphere (ref). Under the new climate change scenarios increases of Co2 efflux from soils are expected (Schlesinger and Andrews, 2000), in turn this can imply a positive feedback to future warming (ref). Because soil respiration is highly sensitive to soil temperature and soil moisture (ref), understanding the responses of soil respiration to these microclimatic conditions, which are affected by global change factors as climate change and forest management is critical for predicting future atmospheric CO2 concentrations.
 
 ## Soil C turnover is controlled by temperature and moisture
 
+## Forest management changes the soil C turnover sensitivity to microclimate
+
 ## Climate change will influence soil C turnover globally
 
-
-
+In this study, during three years we have monthly recorded data on soil respiration and microclimate in three replicated Quercus forests across Europe subjected to different forest management strategies. We have analysed the sensitivity of soil respiration to microclimate (i.e., soil temperature and soil moisture) by constructing a mechanistic model…
 
 # Material and methods
 
@@ -123,7 +124,7 @@ $$
 The rationale behind these choices is to offer two extremes to compare the fitness of our parametric model with, assuming that a linear regression model will perform more poorly than the parametric model given its limited capabilities to represent relationships more complex than linear (as we assume temperature and moisture relationships with respiration), and that a random forest model will perform better than the parametric model given its plasticity. The random forest model was in this case fit with default parameters, without any other optimization.
 
 ## Model extrapolation of increased temperature effect on decomposition
-Once we calibrated our parametric model, we could test the consequences of an increase in temperature on decompiosition by driving the model with the same dataset except temperature was increased by 5&deg;C. This resulted in a more immediate way of visualizing the impact of a different temperature sensitivity of organic material.
+Once we calibrated our parametric model, we could test the consequences of an increase in temperature on decomposition by driving the model with the same dataset except temperature was increased by 5&deg;C. This resulted in a more immediate way of visualizing the impact of a different temperature sensitivity of organic material.
 
 
 ## Machine learning variance decomposition
@@ -166,7 +167,7 @@ The aim of this model was to test the predictive potential of any of these addit
 
 ## Machine learning variance decomposition
 The fitness of the detailed random forest model (fitted only on data from Spain) was the highest of all the models we tested, unsurprisingly given the huge amount of predictors compared with all other models.   
-Soil temperature and moisture resulted the most important variables in predicting respiration from each site by far, followed by edaphic charachrteristics of the site (density and porosity), then by treatment, and then again by edaphic site characteristics (namely pH and total C). Only afterwards the first variable related to aboveground vegetation. Variables related to biomass, total and specific to microorganisms classes, come only later and did not seem particularly important.  
+Soil temperature and moisture resulted the most important variables in predicting respiration from each site by far, followed by edaphic characteristics of the site (density and porosity), then by treatment, and then again by edaphic site characteristics (namely pH and total C). Only afterwards the first variable related to aboveground vegetation. Variables related to biomass, total and specific to microorganisms classes, come only later and did not seem particularly important.  
 ![Fit of the detailed random forest model (a) and variable importance of the same model (b)](../Figures/variance_decomposition.png){width=50%}
 
 
