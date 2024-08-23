@@ -11,11 +11,14 @@ library(caret)
 library(MASS)
 library(parallel)
 
-#TODO DISCUSSION is there an interaction between texture and the TMS calibration?
-#TODO Q10?
 
 #TODO normalization of respiration by SOC when data are there
-#TODO convert volumetric water content to theta_s?
+
+#TODO test variable E_a over time, remove seasonality scaling and use E_a by time
+
+#TODO Enzyme relationships
+
+#TODO convert volumetric water content to theta_s? When data come
 
 #DONE interpolated line of temperature by treatment (average)
 #DONE add the same graph for respiration
