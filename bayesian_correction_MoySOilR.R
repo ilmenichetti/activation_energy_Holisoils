@@ -11,6 +11,19 @@ library(caret)
 library(MASS)
 library(parallel)
 
+set.seed(123)
+
+#TODO Use basal area instead of DBH in the RF model
+
+#TODO NORMALIZE THE TEMPERATURE SCENARIOS!!
+
+#TODO: E_o and E_a are mixed up in the manuscript
+
+#TODO plot SOC stocks by site
+
+#TODO: correlation. between E_a and enzyme activities
+
+#NOTE: CUE and aciivation energy: in reality they relate, modelwise no, it's a shortcoming of having a model not distinguishing for C quality
 
 #TODO normalization of respiration by SOC when data are there
 
@@ -32,9 +45,13 @@ library(parallel)
 
 
 
-edaphics <- read.csv("edaphics.csv")
+# edaphics <- read.csv("edaphics.csv")
 #data <- read.csv("Database_co2_28_05_2024.csv")
-data <- read_xlsx("Database_co2_28_05_2024.xlsx", sheet=1)
+data <- read_xlsx("Database_co2_03_09_2024_format_Lorenzo.xlsx", sheet=1)
+str(data)
+soil_data <- read_xlsx("Soil_data_Lorenzo_22_08_2024_enzymes.xlsx", sheet=1)
+
+
 data$treatment <- as.factor(data$treatment)
 data$site <- as.factor(data$site)
 data$Soil_moist <- as.numeric(data$Soil_moist)/100
@@ -42,14 +59,179 @@ data$T1_soil <- as.numeric(data$T1_soil)
 data$CO2_flux_hour <- as.numeric(data$CO2_flux_hour)
 data$seq <- 1:dim(data)[1]
 
+soil_data
 
 data$Date <- as.Date(data$Date, format = "%d.%m.%Y")
+soil_data$date  <- as.Date(soil_data$date, format = "%d.%m.%Y")
 
 #rearrange the levels putting control first
 data$treatment <- factor(data$treatment, levels = c("control", "clear_cut_no_slash", "clear_cut_slash", "thinning_no_slash", "thinning_slash"))
 
 
+boxplot(soil_data$bulk_den ~soil_data$site)
+boxplot(soil_data$Ctot ~soil_data$site)
+boxplot(soil_data$C_stocks ~soil_data$site)
 
+boxplot(data$CO2_flux_hour ~ data$site)
+plot(data[data$site=="romania",]$Date,
+      data[data$site=="romania",]$CO2_flux_hour)
+boxplot(data$CO2_flux_hour ~ data$site)
+
+
+
+### Normalization by SOC
+
+#loop to parse the SOC data and average respiration by SOC stocks
+
+# Initialize the CO2_flux_norm column
+data$CO2_flux_norm <- NA
+
+# Loop through each row in the data frame
+for (i in 1:nrow(data)) {
+  local_ID <- data[i,]$unique_ID
+  local_SOC <- mean(soil_data[soil_data$unique_ID == local_ID,]$Ctot)
+  local_normalized_flux <- data[i,]$CO2_flux_hour / local_SOC
+  data[i,]$CO2_flux_norm <- local_normalized_flux
+}
+
+
+
+########## ML decomposition for enzyme activities
+
+# Building the table by adding the closest measurtements from the flux sampling campaign
+
+# Add four new empty columns to store the values
+soil_data$CO2_flux_hour <- NA
+soil_data$CO2_flux_norm <- NA
+soil_data$T1_soil <- NA
+soil_data$Soil_moist <- NA
+soil_data$month <- NA
+
+#looping throught the values
+for (i in 1:nrow(soil_data)) {
+
+local_ID <- soil_data[i,]$unique_ID
+local_date <- soil_data[i,]$date
+
+soil_data[i,]$month <- month(local_date, label = TRUE)
+
+local_subset <- data[data$unique_ID == local_ID,]
+
+#Finding the closest date in the local subset
+dates <- local_subset$Date
+dates <- dates[!is.na(dates)]
+differences <- abs(dates - local_date)
+closest_index <- which.min(differences)
+
+soil_data[i,]$CO2_flux_hour = local_subset[closest_index,]$CO2_flux_hour
+soil_data[i,]$CO2_flux_norm = local_subset[closest_index,]$CO2_flux_norm
+soil_data[i,]$T1_soil = local_subset[closest_index,]$T1_soil
+soil_data[i,]$Soil_moist = local_subset[closest_index,]$Soil_moist
+
+}
+
+
+names(soil_data)
+
+
+
+
+
+predictor_list = c("No_trees_ha", "treatment",
+"Basal_area","bulk_den", "Ntot", "C_stocks",
+"beta_gluco", "acid_phos", "beta_xylo", "chitise", #"phosphorous",  "pH",
+"cellobiohydrolase", "beta_galacto", "alpha_gluco", "lipase", "CO2_flux_hour",
+"T1_soil", "Soil_moist" ,"month" )
+
+dim(na.omit(soil_data[,predictor_list]))
+dim(soil_data[,predictor_list])
+soil_data$CO2_flux_hour
+
+# Create stratification group
+soil_strat_group <- interaction(soil_data$treatment, soil_data$site)
+
+# Create stratified partition
+train_indices <- createDataPartition(soil_strat_group, p = 0.8, list = FALSE)
+
+# Split the data into training and validation sets
+soil_data_train <- soil_data[train_indices, ]
+soil_data_valid <- soil_data[-train_indices, ]
+
+rf_soil_data_train <- na.omit(soil_data_train[,predictor_list])
+rf_soil_data_valid <- na.omit(soil_data_valid[,predictor_list])
+
+rf_soil_data_train$treatment <- as.factor(rf_soil_data_train$treatment)
+rf_soil_data_valid$treatment <- as.factor(rf_soil_data_valid$treatment)
+
+
+dim(rf_soil_data_train)
+dim(rf_soil_data_valid)
+
+
+
+# Define the grid of hyperparameters to search
+tune_grid <- expand.grid(
+  mtry = c(3, 4, 5, 6) # Adjust based on the number of predictors
+)
+
+# Define cross-validation method
+control <- trainControl(
+  method = "cv",
+  number = 5,
+  search = "grid"
+)
+
+# Perform the tuning
+set.seed(123) # For reproducibility
+tuned_rf <- train(
+  CO2_flux_hour ~ .,
+  data = rf_soil_data_train,
+  method = "rf",
+  trControl = control,
+  tuneGrid = tune_grid,
+  ntree = 500 # or another fixed value
+)
+
+
+rf_model_CO2_flux <- randomForest(CO2_flux_hour ~ . , data = rf_soil_data_train,
+                               mtry = tuned_rf$bestTune$mtry)
+
+
+plot(predict(rf_model_CO2_flux, newdata = rf_soil_data_valid), rf_soil_data_valid$CO2_flux_hour, ylab="predicted", xlab="observed", main="RF model",
+     col=palette_treat[as.numeric(rf_soil_data_valid$treatment)], pch=as.numeric(rf_soil_data_valid$treatment), xlim=c(0,3), ylim=c(0,3))
+lm<-lm(rf_soil_data_valid$CO2_flux_hour ~ predict(rf_model_CO2_flux, newdata = rf_soil_data_valid))
+summary(lm)
+abline(a=0, b=1, col="black", lty=2)
+legend("topright", levels(rf_soil_data_valid$treatment), bty="n", pch=1:15, col = palette_treat)
+legend("bottomright", paste("R^2 =", round(summary(lm)$r.squared,3)), bty="n", pch=NA, col = NA)
+
+importance(rf_model_CO2_flux)
+varImpPlot(rf_model_CO2_flux)
+
+
+png("./Figures/variance_decomposition_enzyme.png", height = 3000, width = 1500, res = 300)
+par(mfrow=c(2,1))
+plot(predict(rf_model_CO2_flux, newdata = rf_soil_data_valid), rf_soil_data_valid$CO2_flux_hour, ylab="predicted", xlab="observed", main="RF model",
+     col=palette_treat[as.numeric(rf_soil_data_valid$treatment)], pch=as.numeric(rf_soil_data_valid$treatment), xlim=c(0,3), ylim=c(0,3))
+lm<-lm(rf_soil_data_valid$CO2_flux_hour ~ predict(rf_model_CO2_flux, newdata = rf_soil_data_valid))
+summary(lm)
+abline(a=0, b=1, col="black", lty=2)
+legend("topright", levels(rf_soil_data_valid$treatment), bty="n", pch=1:15, col = palette_treat)
+legend("bottomright", paste("R^2 =", round(summary(lm)$r.squared,3)), bty="n", pch=NA, col = NA)
+
+varimp_model_CO2_flux <- varImp(rf_model_CO2_flux)
+varimp_model_CO2_flux[order(varimp_model_CO2_flux$Overall),]
+par(mar=c(1,10,2,2))
+barplot(varimp_model_CO2_flux[order(varimp_model_CO2_flux$Overall),], las=2,
+        names.arg = rownames(varimp_model_CO2_flux)[order(varimp_model_CO2_flux$Overall)], horiz = T)
+dev.off()
+
+
+
+
+
+
+#####################
 
 palette_treat <-  c(paletteer::paletteer_c("ggthemes::Orange-Gold", n=5),
                     paletteer::paletteer_c("ggthemes::Green", n=5),
@@ -67,7 +249,8 @@ palette_plot <-  c(paletteer::paletteer_c("ggthemes::Orange-Gold", n=length(uniq
 
 processed_data <- data.frame(ID = data$seq,
                              ID_old = data$ID,
-                             CO2_flux_hour = data$CO2_flux_hour, T1_soil = data$T1_soil,
+                             CO2_flux_hour = data$CO2_flux_norm,
+                             T1_soil = data$T1_soil,
                              Soil_moist = data$Soil_moist,
                              treatment = interaction(data$treatment,as.factor(data$site)),
                              site = data$site,
@@ -297,10 +480,18 @@ plot(predict(rf_model), processed_data_filtered$CO2_flux_hour)
 summary(rf_fit)$r.squared
 
 
+
+
+
 png("./Figures/fit_ML_validation.png", height = 2000, width = 4000, res=300)
+
+range_plot = range(c(predict(rf_model, newdata = validation_data),
+                     validation_data$CO2_flux_hour,
+                     predict(linear_model, newdata = validation_data)))
+
 par(mfrow=c(1,2))
 plot(predict(rf_model, newdata = validation_data), validation_data$CO2_flux_hour, ylab="predicted", xlab="observed", main="RF model",
-     col=palette_treat[as.numeric(validation_data$treatment)], pch=as.numeric(validation_data$treatment), xlim=c(0,3), ylim=c(0,3))
+     col=palette_treat[as.numeric(validation_data$treatment)], pch=as.numeric(validation_data$treatment), xlim=range_plot, ylim=range_plot)
 lm<-lm(validation_data$CO2_flux_hour ~ predict(rf_model, newdata = validation_data))
 summary(lm)
 abline(a=0, b=1, col="black", lty=2)
@@ -309,13 +500,20 @@ legend("bottomright", paste("R^2 =", round(summary(lm)$r.squared,3)), bty="n", p
 legend("bottomleft", "a)", bty="n", pch=NA, col = NA)
 
 plot(predict(linear_model, newdata = validation_data), validation_data$CO2_flux_hour, ylab="predicted", xlab="observed", main="Multiple linear model",
-    col=palette_treat[as.numeric(validation_data$treatment)], pch=as.numeric(validation_data$treatment), xlim=c(0,3), ylim=c(0,3))
+    col=palette_treat[as.numeric(validation_data$treatment)], pch=as.numeric(validation_data$treatment), xlim=range_plot, ylim=range_plot)
 lm<-lm(validation_data$CO2_flux_hour ~ predict(linear_model, newdata = validation_data))
 summary(lm)
 abline(a=0, b=1, col="black", lty=2)
 legend("bottomright", paste("R^2 =", round(summary(lm)$r.squared,3)), bty="n", pch=NA, col = NA)
 legend("bottomleft", "b)", bty="n", pch=NA, col = NA)
 
+dev.off()
+
+
+res_linear <- validation_data$CO2_flux_hour - predict(linear_model, newdata = validation_data)
+
+png("./Figures/Checks/flinear_model_residuals.png", height = 2000, width = 4000, res=300)
+boxplot(res_linear ~ validation_data$treatment, ylab = "residuals linear model")
 dev.off()
 
 

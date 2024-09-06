@@ -45,8 +45,8 @@ model {
     }
 
   // Priors
-  A ~ normal(300, 100);
-  Ea ~ normal(398.5, 50);
+  A ~ uniform(0, 500);
+  Ea ~ normal(398.5, 100);
   a ~ normal(3.11, 0.1);
   b ~ normal(2.42, 0.1);
   amplitude ~ uniform(0, 0.5);

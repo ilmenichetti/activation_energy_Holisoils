@@ -164,11 +164,14 @@ The aim of this model was to test the predictive potential of any of these addit
 
 
 
-## Machine learning variance decomposition
+## Machine learning variance decomposition: predicting the whole dataset based on ecological variables
 The fitness of the detailed random forest model (fitted only on data from Spain) was the highest of all the models we tested, unsurprisingly given the huge amount of predictors compared with all other models.   
 Soil temperature and moisture resulted the most important variables in predicting respiration from each site by far, followed by edaphic characteristics of the site (density and porosity), then by treatment, and then again by edaphic site characteristics (namely pH and total C). Only afterwards the first variable related to aboveground vegetation. Variables related to biomass, total and specific to microorganisms classes, come only later and did not seem particularly important.  
 ![Fit of the detailed random forest model (a) and variable importance of the same model (b)](../Figures/variance_decomposition.png){width=50%}
 
+## Machine learning variance decomposition: predicting a substet based on soil enzymatic data
+
+![Fit of the detailed random forest model (a) and variable importance of the same model (b)](../Figures/variance_decomposition_enzyme.png){width=50%}
 
 
 
