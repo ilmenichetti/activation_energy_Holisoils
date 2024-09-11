@@ -17,7 +17,7 @@ set.seed(123)
 
 #TODO NORMALIZE THE TEMPERATURE SCENARIOS!!
 
-#TODO: E_o and E_a are mixed up in the manuscript
+#DONE: E_o and E_a are mixed up in the manuscript
 
 #TODO plot SOC stocks by site
 
@@ -340,7 +340,7 @@ dev.off()
 ###########################################################################
 
 
-modeled_extrapolations <- temp_moist_season(temp = stan_data$temp+5,
+modeled_extrapolations <- temp_moist_season(temp = stan_data$temp+3,
                                         M = stan_data$M+0.05,
                                         day_year = stan_data$day_year,
                                         a = colMeans(post_bytreat_indA_Moy$a),
@@ -366,9 +366,15 @@ plot(modeled_extrapolations,
      modeled_zero)
 
 
-temp_effect = modeled_extrapolations -  modeled_zero
+
+temp_effect = (modeled_extrapolations -  modeled_zero)/modeled_zero
 png("./Figures/scenario_extrapolation.png", height=1800, width = 2000, res = 300)
 par(mar=c(12,4,2,2))
-bp <- boxplot(temp_effect ~ stan_data$treatment, names = names_treats, las=2, col = palette_treat_simplified, main = "Climate change vulnerability", ylab= "increase in mineralization", xlab="")
+bp <- boxplot(temp_effect*100 ~ stan_data$treatment, names = names_treats, las=2,
+              col = palette_treat_simplified,
+              main = expression("Vulnerability to +3" * degree * " C"),
+              ylab= "Increase in mineralization (% of current climate)",
+              xlab="",
+              ylim=c(0,150))
 add_shading_to_boxplot(bp, density = density_palette, angle = angle_palette)
 dev.off()

@@ -146,7 +146,7 @@ par(mfrow=c(1,2))
 E_0_densities_indA_Moy <- list()
 E_0_box_indA_Moy <- list()
 plot( density(post_bytreat_indA_Moy$Ea[,1]), xlim=c(range(post_bytreat_indA_Moy$Ea)[1]*0.9, range(post_bytreat_indA_Moy$Ea)[2]*1.1),
-      ylim=c(0,0.07), xlab = expression('E'[0]), col=NA, main="Temperature scaling")
+      ylim=c(0,0.07), xlab = expression('E'[a]), col=NA, main="")
 for(i in 1:stan_data$Tr){
   E_0_densities_indA_Moy[[i]] <- density(post_bytreat_indA_Moy$Ea[,i])
   E_0_box_indA_Moy[[i]] <- E_0_densities_indA_Moy[[i]]$x
@@ -160,7 +160,7 @@ for(i in 1:stan_data$Tr){
 A_densities_indA_Moy <- list()
 A_box_indA_Moy <- list()
 plot( density(post_bytreat_indA_Moy$A[,1]), xlim=c(range(post_bytreat_indA_Moy$A)[1]*0.9, range(post_bytreat_indA_Moy$A)[2]*1.1),
-      ylim=c(0, 0.03), xlab = expression('A'), col=NA, main="Temperature scaling")
+      ylim=c(0, 0.03), xlab = expression('A'), col=NA, main="")
 for(i in 1:stan_data$Pl){
   A_densities_indA_Moy[[i]] <- density(post_bytreat_indA_Moy$A[,i])
   A_box_indA_Moy[[i]] <- A_densities_indA_Moy[[i]]$x
@@ -179,7 +179,7 @@ par(mfrow=c(1,2))
 peak_densities_indA_Moy <- list()
 peak_box_indA_Moy <- list()
 plot( density(post_bytreat_indA_Moy$peak_day[,1]), xlim=c(range(post_bytreat_indA_Moy$peak_day)[1]*0.9, range(post_bytreat_indA_Moy$peak_day)[2]*1.1),
-      ylim=c(0,0.05), xlab = "peak_day", col=NA, main="Seasonality scaling")
+      ylim=c(0,0.05), xlab = "peak_day", col=NA, main="")
 for(i in 1:stan_data$Tr){
   peak_densities_indA_Moy[[i]] <- density(post_bytreat_indA_Moy$peak_day[,i])
   polygon(peak_densities_indA_Moy[[i]], col=add.alpha(palette_treat[i],0.4), border = add.alpha(palette_treat[i],0.8))
@@ -193,7 +193,7 @@ for(i in 1:stan_data$Tr){
 amplitude_densities_indA_Moy <- list()
 amplitude_box_indA_Moy <- list()
 plot( density(post_bytreat_indA_Moy$amplitude[,1]), xlim=c(range(post_bytreat_indA_Moy$amplitude)[1]*0.9, range(post_bytreat_indA_Moy$amplitude)[2]*1.1),
-      ylim=c(0, 70), xlab = expression('amplitude'), col=NA, main="Seasonality scaling")
+      ylim=c(0, 70), xlab = expression('amplitude'), col=NA, main="")
 for(i in 1:stan_data$Tr){
   amplitude_densities_indA_Moy[[i]] <- density(post_bytreat_indA_Moy$amplitude[,i])
   polygon(amplitude_densities_indA_Moy[[i]], col=add.alpha(palette_treat[i],0.25), border = add.alpha(palette_treat[i],0.6))
@@ -212,7 +212,7 @@ par(mfrow=c(1,2))
 a_densities_indA_Moy <- list()
 a_box_indA_Moy <- list()
 plot(density(post_bytreat_indA_Moy$a[,1]), xlim=c(range(post_bytreat_indA_Moy$a)[1]*0.9, range(post_bytreat_indA_Moy$a)[2]*1.1),
-     ylim=c(0,4.95), xlab = "a", col=NA, main="Moisture scaling")
+     ylim=c(0,4.95), xlab = "a", col=NA, main="")
 for(i in 1:stan_data$Tr){
   a_densities_indA_Moy[[i]] <- density(post_bytreat_indA_Moy$a[,i])
   polygon(a_densities_indA_Moy[[i]], col=add.alpha(palette_treat[i],0.4), border = add.alpha(palette_treat[i],0.8))
@@ -226,7 +226,7 @@ for(i in 1:stan_data$Tr){
 b_densities_indA_Moy <- list()
 b_box_indA_Moy <- list()
 plot( density(post_bytreat_indA_Moy$b[,1]), xlim=c(range(post_bytreat_indA_Moy$b)[1]*0.9, range(post_bytreat_indA_Moy$b)[2]*1.1),
-      ylim=c(0, 4.4), xlab = expression('b'), col=NA, main="Moisture scaling")
+      ylim=c(0, 4.4), xlab = expression('b'), col=NA, main="")
 for(i in 1:stan_data$Tr){
   b_densities_indA_Moy[[i]] <- density(post_bytreat_indA_Moy$b[,i])
   polygon(b_densities_indA_Moy[[i]], col=add.alpha(palette_treat[i],0.25), border = add.alpha(palette_treat[i],0.6))
@@ -286,7 +286,7 @@ layout_matrix <- matrix(c(
 # Set up the layout
 layout(layout_matrix)
 
-bp <- boxplot(E_0_box_indA_Moy, names = names_treats, las=2, col = palette_treat_simplified, main = expression(E[0]))
+bp <- boxplot(E_0_box_indA_Moy, names = names_treats, las=2, col = palette_treat_simplified, main = expression(E[a]))
 add_shading_to_boxplot(bp, density = density_palette, angle = angle_palette)
 legend("topright", "(a)", pch=NA, bty="n")
 bp <- boxplot(peak_box_indA_Moy, names = names_treats, las=2, col = palette_treat_simplified, main = "peak")
