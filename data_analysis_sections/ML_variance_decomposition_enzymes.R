@@ -1,7 +1,7 @@
 
 
 predictor_list = c("No_trees_ha", "treatment",
-                   "Basal_area","bulk_den", "Ntot", "C_stocks",
+                   "Basal_area","bulk_den", #"Ntot", "C_stocks",
                    "beta_gluco", "acid_phos", "beta_xylo", "chitise", #"phosphorous",  "pH",
                    "cellobiohydrolase", "beta_galacto", "alpha_gluco", "lipase", "CO2_flux_norm",
                    "T1_soil", "Soil_moist" ,"month" )

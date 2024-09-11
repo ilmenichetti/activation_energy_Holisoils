@@ -25,7 +25,7 @@ set.seed(123)
 
 #NOTE: CUE and aciivation energy: in reality they relate, modelwise no, it's a shortcoming of having a model not distinguishing for C quality
 
-#TODO normalization of respiration by SOC when data are there
+#DONE normalization of respiration by SOC when data are there
 
 #TODO test variable E_a over time, remove seasonality scaling and use E_a by time
 
@@ -84,7 +84,40 @@ palette_plot <-  c(paletteer::paletteer_c("ggthemes::Orange-Gold", n=length(uniq
                    paletteer::paletteer_c("ggthemes::Green", n=length(unique(data[data$site=="romania",]$plot_ID))),
                    paletteer::paletteer_c("ggthemes::Blue-Teal", n=length(unique(data[data$site=="spain",]$plot_ID))))
 
+# palette_treat
+palette_treat <- c("#F4D166FF", "#F6A143FF", "#EE711DFF", "#CD4E22FF", "#9E3A26FF",
+                   "#B3E0A6FF", "#7FC572FF", "#5DA554FF", "#378748FF", "#24693DFF",
+                   "#BCE4D8FF", "#81C3CBFF", "#46A1B8FF", "#347C9FFF", "#2C5985FF")
 
+# palette_plot
+palette_plot <- c("#F4D166FF", "#F5CC63FF", "#F6C760FF", "#F7C25CFF", "#F8BD58FF",
+                  "#F8B855FF", "#F8B352FF", "#F8AE4FFF", "#F7A94BFF", "#F7A447FF",
+                  "#F69F42FF", "#F59B3EFF", "#F49639FF", "#F49235FF", "#F38D31FF",
+                  "#F3882CFF", "#F28228FF", "#F17D24FF", "#F07820FF", "#EF731DFF",
+                  "#EC6E1DFF", "#E96A1CFF", "#E6661DFF", "#E3631EFF", "#E05F1FFF",
+                  "#DD5C1FFF", "#D95820FF", "#D65421FF", "#D25122FF", "#CE4E22FF",
+                  "#C94C22FF", "#C54A22FF", "#C04823FF", "#BB4623FF", "#B64423FF",
+                  "#B14223FF", "#AD4024FF", "#A83E24FF", "#A33C25FF", "#9E3A26FF",
+                  "#B3E0A6FF", "#ACDE9EFF", "#A5DB96FF", "#9FD98FFF", "#99D688FF",
+                  "#94D384FF", "#8FD080FF", "#8ACE7CFF", "#86CB78FF", "#82C774FF",
+                  "#7EC471FF", "#7AC06DFF", "#76BD6AFF", "#73BA67FF", "#6FB764FF",
+                  "#6CB461FF", "#68B05DFF", "#65AD5AFF", "#62AA57FF", "#5FA755FF",
+                  "#5BA454FF", "#57A153FF", "#539E52FF", "#4F9B51FF", "#4B9850FF",
+                  "#48954FFF", "#44914EFF", "#418E4CFF", "#3C8B4AFF", "#388848FF",
+                  "#348546FF", "#2F8244FF", "#2D7F42FF", "#2B7C40FF", "#29793EFF",
+                  "#27763DFF", "#26723DFF", "#256F3DFF", "#256C3DFF", "#24693DFF",
+                  "#BCE4D8FF", "#B5E0D7FF", "#AEDCD5FF", "#A8D9D4FF", "#A2D5D2FF",
+                  "#9CD2D1FF", "#96CFCFFF", "#90CCCEFF", "#8AC9CCFF", "#85C5CBFF",
+                  "#7FC2CAFF", "#7ABEC9FF", "#74BBC7FF", "#6EB7C5FF", "#68B3C3FF",
+                  "#62B0C1FF", "#5CADBFFF", "#55AABDFF", "#4EA7BBFF", "#49A3B9FF",
+                  "#44A0B7FF", "#409CB5FF", "#3D98B3FF", "#3A94B1FF", "#3790AFFF",
+                  "#358DACFF", "#3589A9FF", "#3585A6FF", "#3481A3FF", "#347DA0FF",
+                  "#337A9DFF", "#32769AFF", "#317298FF", "#316E96FF", "#306A93FF",
+                  "#2F6790FF", "#2E638DFF", "#2D608AFF", "#2D5C87FF", "#2C5985FF")
+
+palette_treat_simplified <- c(palette_treat[1], palette_treat[3], palette_treat[3], palette_treat[5], palette_treat[5],
+                              palette_treat[6], palette_treat[8], palette_treat[8], palette_treat[10], palette_treat[10],
+                              palette_treat[11], palette_treat[13], palette_treat[13], palette_treat[15], palette_treat[15])
 
 
 
@@ -279,150 +312,21 @@ png("./Figures/residuals_vs_climate.png", height=1500, width=3000, res=300)
 par(mfrow=c(1,2))
 # Set parameters
 plot(processed_data_filtered$T1_soil, residuals_indA_moy, xlab="T1 soil",
-     ylab="residuals", xaxt="n",  col=palette_treat[as.numeric(processed_data_filtered$treatment)][resample_vector],
+     ylab="residuals", xaxt="n",
+     col=palette_treat[as.numeric(processed_data_filtered$treatment)],
      pch=as.numeric(processed_data$treatment))
 abline(h=0)
 axis.Date(1, at = seq(from = min(as.Date(processed_data_filtered$date)), to = max(as.Date(processed_data_filtered$date)), by = "month"), format = "%b %Y", las=2)
 # legend("bottomright", levels(processed_data$treatment), bty="n", pch=1:15, col = palette_treat)
 
 plot(processed_data_filtered$Soil_moist, residuals_indA_moy,  xlab="Soil moisture",
-     ylab="residuals", xaxt="n", col=palette_treat[as.numeric(processed_data_filtered$treatment)][resample_vector],
+     ylab="residuals", xaxt="n", col=palette_treat[as.numeric(processed_data_filtered$treatment)],
      pch=as.numeric(processed_data$treatment))
 abline(h=0)
 axis.Date(1, at = seq(from = min(as.Date(processed_data_filtered$date)), to = max(as.Date(processed_data_filtered$date)), by = "month"), format = "%b %Y", las=2)
 
 dev.off()
 
-
-
-
-### Testing residuals against soil and tree data, only Spain
-
-soil_data_Spain <- read_xlsx("Soil_data_Spain.xlsx")
-names(soil_data_Spain)[2] = "plot_id_bycountry"
-
-resdata[resdata$country =="spain",]$plot_id_bycountry
-
-merged_resdata_soil = merge(soil_data_Spain, resdata[resdata$country =="spain",], by ="plot_id_bycountry" )
-
-plot(merged_resdata_soil$residuals_indA_moy, merged_resdata_soil$`No. trees/ha`)
-plot(merged_resdata_soil$residuals_indA_moy, merged_resdata_soil$fungi_bact_rate)
-plot(merged_resdata_soil$residuals_indA_moy, merged_resdata_soil$fungi_biomass)
-
-predictor_list<-c("disturbance",
-                  "No. trees/ha", "No. Quercus/ha","Mean_DBH","porosity_Robin","bulk_den","pH","phosphorous","Ntot",
-                  "Ctot","fungi_biomass","bacteria_biomass","actinobacteria_biomass","gram_pos_biomass","gram_neg_biomass",
-                  "total_biomass","fungi_bact_rate",  "residuals_indA_moy")
-rf_residuals_dataset = as.data.frame(merged_resdata_soil[,predictor_list])
-names(rf_residuals_dataset)[2:3] = c("tree_density", "Quercus_density")
-rf_residuals_dataset = na.omit(rf_residuals_dataset)
-
-# Train the random forest model on the full dataset
-rf_model_res <- randomForest(residuals_indA_moy ~ ., data = rf_residuals_dataset)
-
-
-png("./Checks/residuals_prediction_spain.png", height=2500, width = 1500, res= 300)
-par(mfrow=c(2,1))
-# Predicted residuals from the random forest model
-predicted_residuals <- predict(rf_model_res)
-
-# Plot predicted residuals against actual residuals
-plot(predicted_residuals, rf_residuals_dataset$residuals_indA_moy,
-     xlab = "Predicted Residuals", ylab = "Actual Residuals")
-abline(0, 1, col = "red")  # Adding a 45-degree line for reference
-
-# Optional: Calculate R-squared for the fit of predicted vs actual residuals
-rf_fit_res <- lm(predicted_residuals ~ rf_residuals_dataset$residuals_indA_moy)
-summary(rf_fit_res)$r.squared
-legend("topleft", paste("R^2 =", round(summary(rf_fit_res)$r.squared,3)), bty="n", pch=NA, col = NA)
-
-
-varImpPlot(rf_model_res)
-
-dev.off()
-
-
-processed_data_Spain_calib = merge(soil_data_Spain, processed_data_filtered[processed_data_filtered$country =="spain",], by ="plot_id_bycountry" )
-processed_data_Spain_valid = merge(soil_data_Spain, validation_data[validation_data$country =="spain",], by ="plot_id_bycountry" )
-normalized_resp_calib <- processed_data_Spain_calib$CO2_flux_hour/processed_data_Spain_calib$Ctot
-normalized_resp_valid <- processed_data_Spain_valid$CO2_flux_hour/processed_data_Spain_valid$Ctot
-
-processed_data_Spain_calib <- cbind(processed_data_Spain_calib, normalized_resp = normalized_resp_calib)
-processed_data_Spain_valid <- cbind(processed_data_Spain_valid, normalized_resp = normalized_resp_valid)
-
-names(processed_data_Spain_calib)[13] = "No.trees.ha"
-names(processed_data_Spain_valid)[13] = "No.trees.ha"
-
-processed_data_Spain_calib$No.trees.ha <- as.numeric(processed_data_Spain_calib$No.trees.ha)
-processed_data_Spain_calib$Mean_DBH <- as.numeric(processed_data_Spain_calib$Mean_DBH)
-processed_data_Spain_calib$fungi_bact_rate <- as.numeric(processed_data_Spain_calib$fungi_bact_rate)
-
-processed_data_Spain_valid$No.trees.ha <- as.numeric(processed_data_Spain_valid$No.trees.ha)
-processed_data_Spain_valid$Mean_DBH <- as.numeric(processed_data_Spain_valid$Mean_DBH)
-processed_data_Spain_valid$fungi_bact_rate <- as.numeric(processed_data_Spain_valid$fungi_bact_rate)
-
-processed_data_Spain_calib[processed_data_Spain_calib$disturbance == "clear_cut",]$Mean_DBH = 0
-processed_data_Spain_calib[processed_data_Spain_calib$disturbance == "clear_cut",]$No.trees.ha = 0
-processed_data_Spain_valid[processed_data_Spain_valid$disturbance == "clear_cut",]$Mean_DBH = 0
-processed_data_Spain_valid[processed_data_Spain_valid$disturbance == "clear_cut",]$No.trees.ha = 0
-
-
-
-predictor_list = c("No.trees.ha","Mean_DBH","bulk_den_Robin",
-               "porosity_Robin","pH","phosphorous","Ntot",
-               "Ctot","fungi_biomass","bacteria_biomass","actinobacteria_biomass", "gram_pos_biomass","gram_neg_biomass",
-               "total_biomass","CO2_flux_hour","T1_soil",
-               "Soil_moist","gen_treatment")
-
-
-
-# Define the grid of hyperparameters to search
-tune_grid <- expand.grid(
-  mtry = c(3, 4, 5, 6) # Adjust based on the number of predictors
-)
-
-# Define cross-validation method
-control <- trainControl(
-  method = "cv",
-  number = 5,
-  search = "grid"
-)
-
-# Perform the tuning
-set.seed(123) # For reproducibility
-tuned_rf <- train(
-  CO2_flux_hour ~ .,
-  data = na.omit(processed_data_Spain_calib[,predictor_list]),
-  method = "rf",
-  trControl = control,
-  tuneGrid = tune_grid,
-  ntree = 500 # or another fixed value
-)
-
-rf_model_spain <- randomForest(CO2_flux_hour ~ . , data = na.omit(processed_data_Spain_calib[,predictor_list]),
-                               mtry = tuned_rf$bestTune$mtry)
-
-
-png("./Figures/variance_decomposition.png", height = 3000, width = 1500, res = 300)
-par(mfrow=c(2,1))
-plot(predict(rf_model_spain, newdata = processed_data_Spain_valid), processed_data_Spain_valid$CO2_flux_hour ,ylab="predicted", xlab="observed", main="",
-     col=palette_treat[as.numeric(processed_data_Spain_valid$treatment.y)], pch=as.numeric(processed_data_Spain_valid$treatment.y), xlim=c(0,3), ylim=c(0,3))
-rf_model_spain_fit <- summary(lm(processed_data_Spain_valid$CO2_flux_hour ~ predict(rf_model_spain, newdata = processed_data_Spain_valid[,predictor_list])))$r.squared
-legend("topleft", paste("R^2 =", round(rf_model_spain_fit,3)), bty="n", pch=NA, col = NA)
-abline(a=0, b=1, lty=2)
-varimp_spain <- varImp(rf_model_spain)
-varimp_spain[order(varimp_spain$Overall),]
-par(mar=c(1,10,2,2))
-barplot(varimp_spain[order(varimp_spain$Overall),], las=2, names.arg = rownames(varimp_spain)[order(varimp_spain$Overall)], horiz = T)
-dev.off()
-
-
-png("./Checks/residuals_vs_pH.png", height = 1500, width = 2800, res = 300)
-plot(rf_residuals_dataset$pH, rf_residuals_dataset$residuals_indA_moy, main = "Lloyd-Taylor + Moyano",ylab="Residuals", xlab="pH",
-     col=palette_treat[as.numeric(processed_data$treatment)], pch=as.numeric(processed_data$treatment))
-abline(h=0)
-legend("bottomright", levels(processed_data$treatment), bty="n", pch=1:15, col = palette_treat)
-dev.off()
 
 
 

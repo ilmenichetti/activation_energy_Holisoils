@@ -28,8 +28,9 @@ dev.off()
 
 png("./Figures/Season.png", width = 2000, height = 2000, res=300)
 
+amplitude=0.1183339
 day_year = seq(1:365)
-sine_wave =  0.1183339 * cos((2 * pi / 365) * day_year + (2 * pi/ 365) * (176.3293 - 1) - pi / 2);
+sine_wave =  amplitude * cos((2 * pi / 365) * day_year + (2 * pi/ 365) * (176.3293 - 1) - pi / 2);
 
 plot(day_year, sine_wave, type = "l", main = "Sine seasonality",
      xlab = "Day of the year", ylab = "Additive seasonality pattern", col = "darkorange")

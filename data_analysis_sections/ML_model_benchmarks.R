@@ -25,9 +25,6 @@ plot(predict(linear_model, newdata = validation_data), validation_data$CO2_flux_
 rf_model = randomForest(CO2_flux_norm ~ T1_soil * Soil_moist * treatment, processed_data_filtered)
 summary(rf_model)
 rf_fit <- lm(predict(rf_model) ~ processed_data_filtered$CO2_flux_norm)
-plot(predict(rf_model), processed_data_filtered$CO2_flux_hour)
-summary(rf_fit)$r.squared
-
 
 
 

@@ -1,3 +1,5 @@
+
+
 library(parallel)
 
 # Set the number of cores to use
@@ -41,7 +43,7 @@ polygon(density(validation_data$CO2_flux_norm))
 
 
 # define the number of runs of the MCMC
-N_RUNS = 4000
+N_RUNS = 10000
 
 # Determine the number of cores available
 num_cores <- detectCores()
@@ -52,7 +54,7 @@ fit_bytreat_indA_Moy_sin <- stan(
   file = 'temp_moist_season_model.stan',
   data = stan_data,
   iter = N_RUNS,
-  chains = 10,
+  chains = 5,
   cores = num_cores-1,  # Use all available cores
   control = list(adapt_delta = 0.99, max_treedepth = 15)
 )
@@ -315,11 +317,13 @@ max(summary(fit_bytreat_indA_Moy_sin)$summary[,"Rhat"], na.rm = T)
 predicted_means_indA_Moy <- apply(post_bytreat_indA_Moy$model_resp, 2, mean)
 predicted_sds_indA_Moy <- apply(post_bytreat_indA_Moy$model_resp, 2, sd)
 
+length(predicted_means_indA_Moy)
+
 png("./Figures/fit_model.png", height = 2000, width = 2000, res=300)
-plot(predicted_means_indA_Moy, processed_data_filtered$CO2_flux_hour, ylab="observed", xlab="predicted",
+plot(predicted_means_indA_Moy, processed_data_filtered$CO2_flux_norm, ylab="observed", xlab="predicted",
      col=palette_treat[as.numeric(processed_data_filtered$treatment)],
      pch=as.numeric(processed_data_filtered$treatment), xlim=c(0,3), ylim=c(0,3))
-lm<-lm(processed_data_filtered$CO2_flux_hour ~ predicted_means_indA_Moy)
+lm<-lm(processed_data_filtered$CO2_flux_norm ~ predicted_means_indA_Moy)
 summary(lm)
 abline(a=0, b=1, col="black", lty=2)
 #legend("topleft", levels(processed_data$site), bty="n", pch=1:3)
@@ -414,10 +418,10 @@ modeled_validation <- temp_moist_season(temp = stan_data_valid$temp,
 
 png("./Figures/fit_model_validation.png", height = 2000, width = 2000, res=300)
 # the object range_plot comes from running the ML_model_benchmark.R file first
-plot(modeled_validation, validation_data$CO2_flux_hour, ylab="observed", xlab="predicted",
+plot(modeled_validation, validation_data$CO2_flux_norm, ylab="observed", xlab="predicted",
      col=palette_treat[as.numeric(validation_data$treatment)],
      pch=as.numeric(validation_data$treatment), xlim=range_plot, ylim=range_plot)
-lm<-lm(validation_data$CO2_flux_hour ~ modeled_validation)
+lm<-lm(validation_data$CO2_flux_norm ~ modeled_validation)
 summary(lm)
 abline(a=0, b=1, col="black", lty=2)
 #legend("topleft", levels(processed_data$site), bty="n", pch=1:3)
