@@ -2,9 +2,10 @@
 title: "The impact of forest management on the temperature sensitivity of organic matter turnover"
 author: "Leticia Pérez-Izquiero, Lorenzo Menichetti, Jorge Curiel-Juste, etc"
 date: "2024-07-04"
-output:
-  bookdown::html_document2: default
-  bookdown::pdf_document2: default
+# output:
+#   bookdown::html_document2: default
+#   bookdown::pdf_document2: default
+output: word_document
   #output: pdf_document
   #   citation_package: natbib
 bibliography: references.bib
@@ -143,7 +144,6 @@ The aim of this model was to test the predictive potential of any of these addit
 # Results
 
 ## Sites microclimate
-<!-- ![Climatic parameters measured at the sites, plotted as data density of all measurements. Please notice thot not every time series covers the same period of time.](../Figures/climatedata.png){width=60%} -->
 ![Climatic parameters and respirations measured at the sites (mean values after loess interpolation with span = 0.5). Please notice thot not every time series covers the same period of time. Red shades = France, green shades = Romania, blue shades = Spain](../Figures/climatedata_means.png){width=60%}
 
 

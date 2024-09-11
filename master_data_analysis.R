@@ -15,7 +15,7 @@ set.seed(123)
 
 #TODO Use basal area instead of DBH in the RF model
 
-#TODO NORMALIZE THE TEMPERATURE SCENARIOS!!
+#DONE NORMALIZE THE TEMPERATURE SCENARIOS!!
 
 #DONE: E_o and E_a are mixed up in the manuscript
 
