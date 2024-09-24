@@ -230,3 +230,18 @@ Any other variable than soil temperature and moisture did not seem to play a piv
 
 
 ![Seasonality scaling function](../Figures/Season.png){width=50%}
+
+
+
+```{r, echo=FALSE}
+# Load necessary libraries
+library(knitr)
+
+# Read the CSV file
+anova_results <- read.csv("../Tables/Enzyme_means.csv", stringsAsFactors = FALSE)
+
+# Display the table with HTML superscripts
+kable(anova_results, escape = FALSE)
+```
+
+

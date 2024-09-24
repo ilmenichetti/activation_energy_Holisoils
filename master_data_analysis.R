@@ -20,6 +20,7 @@ set.seed(123)
 #DONE: E_o and E_a are mixed up in the manuscript
 
 #TODO plot SOC stocks by site
+#TODO plot the enzyme data by site (probably for supplement). Maybe ANOVA by site?
 
 #TODO: correlation. between E_a and enzyme activities
 
@@ -28,8 +29,6 @@ set.seed(123)
 #DONE normalization of respiration by SOC when data are there
 
 #TODO test variable E_a over time, remove seasonality scaling and use E_a by time
-
-#TODO Enzyme relationships
 
 #TODO convert volumetric water content to theta_s? When data come
 
@@ -180,6 +179,11 @@ names(soil_data)
 # ************************************************************
 source("./data_analysis_sections/ML_variance_decomposition_enzymes.R")
 
+
+# ************************************************************
+# **************  Enzyme variance decomposition  conventional ***************
+# ************************************************************
+source("./data_analysis_sections/conventional_variance_decomposition_enzymes.R")
 
 
 
@@ -340,7 +344,7 @@ dev.off()
 ###########################################################################
 
 
-modeled_extrapolations <- temp_moist_season(temp = stan_data$temp+3,
+modeled_extrapolations <- temp_moist_season(temp = stan_data$temp+5,
                                         M = stan_data$M+0.05,
                                         day_year = stan_data$day_year,
                                         a = colMeans(post_bytreat_indA_Moy$a),
@@ -372,9 +376,13 @@ png("./Figures/scenario_extrapolation.png", height=1800, width = 2000, res = 300
 par(mar=c(12,4,2,2))
 bp <- boxplot(temp_effect*100 ~ stan_data$treatment, names = names_treats, las=2,
               col = palette_treat_simplified,
-              main = expression("Vulnerability to +3" * degree * " C"),
+              main = expression("Vulnerability to +5" * degree * " C"),
               ylab= "Increase in mineralization (% of current climate)",
               xlab="",
-              ylim=c(0,150))
+              ylim=c(0,200))
 add_shading_to_boxplot(bp, density = density_palette, angle = angle_palette)
 dev.off()
+
+
+
+source("./data_analysis_sections/site_local_data.R")
