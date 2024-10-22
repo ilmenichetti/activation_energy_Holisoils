@@ -13,33 +13,9 @@ library(parallel)
 
 set.seed(123)
 
-#TODO Use basal area instead of DBH in the RF model
+#TODO color code in the boxplot and Ea, they don't match. Compare and find the error
 
-#DONE NORMALIZE THE TEMPERATURE SCENARIOS!!
-
-#DONE: E_o and E_a are mixed up in the manuscript
-
-#TODO plot SOC stocks by site
-#TODO plot the enzyme data by site (probably for supplement). Maybe ANOVA by site?
-
-#TODO: correlation. between E_a and enzyme activities
-
-#NOTE: CUE and aciivation energy: in reality they relate, modelwise no, it's a shortcoming of having a model not distinguishing for C quality
-
-#DONE normalization of respiration by SOC when data are there
-
-#TODO test variable E_a over time, remove seasonality scaling and use E_a by time
-
-#TODO convert volumetric water content to theta_s? When data come
-
-#DONE interpolated line of temperature by treatment (average)
-#DONE add the same graph for respiration
-#DONE try to make them side by side by site (3 plots)
-
-#DONE plot the reduction functions in appendix
-
-#DONE reorder the treatments with control first
-#DONE in the boxplots treatments control thinning clearcut with different shades, and slah with 45 degrees lines
+#TODO Q10
 
 
 
@@ -47,7 +23,7 @@ set.seed(123)
 
 # edaphics <- read.csv("edaphics.csv")
 #data <- read.csv("Database_co2_28_05_2024.csv")
-data <- read_xlsx("Database_co2_03_09_2024_format_Lorenzo.xlsx", sheet=1)
+data <- read_xlsx("Database_co2_18_10_2024_format_Lorenzo.xlsx", sheet=1)
 str(data)
 soil_data <- read_xlsx("Soil_data_Lorenzo_03_09_2024_enzymes.xlsx", sheet=1)
 
@@ -67,6 +43,7 @@ soil_data$date  <- as.Date(soil_data$date, format = "%d.%m.%Y")
 #rearrange the levels putting control first
 data$treatment <- factor(data$treatment, levels = c("control", "clear_cut_no_slash", "clear_cut_slash", "thinning_no_slash", "thinning_slash"))
 
+str(data)
 
 
 #####################
@@ -117,7 +94,6 @@ palette_plot <- c("#F4D166FF", "#F5CC63FF", "#F6C760FF", "#F7C25CFF", "#F8BD58FF
 palette_treat_simplified <- c(palette_treat[1], palette_treat[3], palette_treat[3], palette_treat[5], palette_treat[5],
                               palette_treat[6], palette_treat[8], palette_treat[8], palette_treat[10], palette_treat[10],
                               palette_treat[11], palette_treat[13], palette_treat[13], palette_treat[15], palette_treat[15])
-
 
 
 #loop to parse the SOC data and average respiration by SOC stocks
@@ -229,8 +205,9 @@ source("./data_analysis_sections/ML_model_benchmarks.R")
 
 
 # ************************************************************
-# ************** Model benchmarks ******************
+# ************** Parametric model fitting ******************
 # ************************************************************
+source("./data_analysis_sections/parametric_model_fitting_time_variant.R")
 source("./data_analysis_sections/parametric_model_fitting.R")
 
 

@@ -17,6 +17,7 @@ range(processed_data_filtered$CO2_flux_hour)
 stan_data <- list(N = length(processed_data_filtered$CO2_flux_norm),
                   Tr = length(levels(processed_data_filtered$treatment)),
                   treatment = as.numeric(processed_data_filtered$treatment),
+                  treatment_txt = (processed_data_filtered$treatment),
                   resp = processed_data_filtered$CO2_flux_norm,
                   temp = processed_data_filtered$T1_soil,
                   M = processed_data_filtered$Soil_moist,
@@ -24,6 +25,8 @@ stan_data <- list(N = length(processed_data_filtered$CO2_flux_norm),
                   plot_id = as.integer(processed_data_filtered$plot_id),
                   day_year = yday(as.Date(processed_data_filtered$date))
 )
+
+str(stan_data)
 
 stan_data_valid <- list(N = length(validation_data$CO2_flux_norm),
                         Tr = length(levels(validation_data$treatment)),
@@ -43,7 +46,7 @@ polygon(density(validation_data$CO2_flux_norm))
 
 
 # define the number of runs of the MCMC
-N_RUNS = 10000
+N_RUNS = 7000
 
 # Determine the number of cores available
 num_cores <- detectCores()
@@ -157,6 +160,7 @@ for(i in 1:stan_data$Tr){
        levels(processed_data_filtered$treatment)[i], col=palette_treat[i], cex=0.8)
 }
 
+
 A_densities_indA_Moy <- list()
 A_box_indA_Moy <- list()
 plot( density(post_bytreat_indA_Moy$A[,1]), xlim=c(range(post_bytreat_indA_Moy$A)[1]*0.9, range(post_bytreat_indA_Moy$A)[2]*1.1),
@@ -172,6 +176,7 @@ for(i in 1:stan_data$Pl){
 }
 dev.off()
 
+barplot(rep(1, length(palette_treat)), col = palette_treat, border = NA, space = 0)
 
 
 png("./Figures/posteriors_seasonality.png", height = 2000, width = 4000, res=350)

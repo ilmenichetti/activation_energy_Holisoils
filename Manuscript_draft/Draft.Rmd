@@ -139,6 +139,7 @@ We included in this model tree density in plants ha$^{-1}$ ($trees$), average di
 This model was tested only on a subset of the dataset (only the sites in Spain), for which all the additional variables were available.
 The aim of this model was to test the predictive potential of any of these additional variables, in order to to explore eventual correlations and possible related processes. The choice of a random forest model over a more conventional linear model is motivated by the capacity of the former to consider more complex relationships and interactions, on top of the convenience of being able to assess quantitatively the predictive potential of each variable by estimating relative variable importance.
 
+## Machine learning variance decomposition on enzymes
 
 
 # Results
