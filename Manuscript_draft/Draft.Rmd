@@ -274,6 +274,8 @@ Any other variable than soil temperature and moisture did not seem to play a piv
 
 
 # Appendix
+![Posteriors of the scaling parameter, varying as a function of single plots](../Figures/posteriors_boxplots_q10.png){width=60%}
+
 ![Posteriors of the scaling parameter, varying as a function of single plots](../Figures/Appendix/posteriors_boxplots_A.png){width=60%}
 
 
