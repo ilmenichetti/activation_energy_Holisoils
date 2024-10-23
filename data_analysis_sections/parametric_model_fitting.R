@@ -5,9 +5,22 @@ library(parallel)
 # Set the number of cores to use
 options(mc.cores = parallel::detectCores())
 
-
+#Q10 range, the two temperatures where to calculate Q10
 Q10_range = range(processed_data_filtered$T1_soil)
 
+#reordering the treatments for plotting uniformity
+processed_data_filtered$treatment <- factor(processed_data_filtered$treatment, levels = c("control.france","thinning_slash.france","thinning_no_slash.france",
+                                                               "clear_cut_slash.france","clear_cut_no_slash.france",
+                                                               "control.romania","thinning_slash.romania", "thinning_no_slash.romania",
+                                                               "clear_cut_slash.romania","clear_cut_no_slash.romania",
+                                                               "control.spain","thinning_slash.spain", "thinning_no_slash.spain",
+                                                               "clear_cut_slash.spain","clear_cut_no_slash.spain"))
+validation_data$treatment <- factor(validation_data$treatment, levels = c("control.france","thinning_slash.france","thinning_no_slash.france",
+                                                                                          "clear_cut_slash.france","clear_cut_no_slash.france",
+                                                                                          "control.romania","thinning_slash.romania", "thinning_no_slash.romania",
+                                                                                          "clear_cut_slash.romania","clear_cut_no_slash.romania",
+                                                                                          "control.spain","thinning_slash.spain", "thinning_no_slash.spain",
+                                                                                          "clear_cut_slash.spain","clear_cut_no_slash.spain"))
 
 # Data list for Stan
 stan_data <- list(N = length(processed_data_filtered$CO2_flux_norm),
@@ -246,13 +259,13 @@ dev.off()
 
 levels(processed_data_filtered$treatment)
 
-names_treats <- c( "control France", "CC no-slash France", "CC slash France", " thin no-slash France", " thin slash France",
-                   "control Romania", "CC no-slash Romania", "CC slash Romania", " thin no-slash Romania"," thin slash Romania",
-                   "control Spain", "CC no-slash Spain", "CC slash Spain", " thin no-slash Spain", " thin slash Spain")
+names_treats <- c( "control France", "thin slash France"," thin no-slash France",  "CC slash France", "CC no-slash France",
+                   "control Romania",  "thin slash Romania","thin no-slash Romania",  "CC slash Romania", "CC no-slash Romania",
+                   "control Spain", "thin slash Spain",  " thin no-slash Spain",  "CC slash Spain","CC no-slash Spain" )
 
 
-angle_palette = rep(c(NA, NA, 45, NA, 45), 3)
-density_palette = rep(c(NA, NA, 20, NA, 20), 3)
+angle_palette = rep(c(180, 45, NA, 45, NA), 3)
+density_palette = rep(c(20, 20, NA, 20, NA), 3)
 
 # define a custom function to add the shading to the boxplots
 add_shading_to_boxplot <- function(bp, density, angle, x_offset = 0.4) {

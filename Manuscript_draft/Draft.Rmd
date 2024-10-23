@@ -301,12 +301,16 @@ Any other variable than soil temperature and moisture did not seem to play a piv
 
 ![Seasonality scaling function](../Figures/Appendix/Season_function.png){width=50%}
 
-
+```{r, echo=FALSE}
+library(knitr)
+posteriors <- read.csv("../Tables/posteriors_summary.csv", stringsAsFactors = FALSE)
+kable(posteriors, escape = FALSE, caption = "Table 1: posterior probability distributions of the prameters, constant Ea")
+```
 
 ```{r, echo=FALSE}
 library(knitr)
 anova_results <- read.csv("../Tables/Enzyme_means.csv", stringsAsFactors = FALSE)
-kable(anova_results, escape = FALSE, caption = "Table 1: ANOVA Results for enzyme activities")
+kable(anova_results, escape = FALSE, caption = "Table 2: ANOVA Results for enzyme activities")
 ```
 
 
@@ -314,5 +318,10 @@ kable(anova_results, escape = FALSE, caption = "Table 1: ANOVA Results for enzym
 ```{r, echo=FALSE}
 library(knitr)
 anova_results_edaph <- read.csv("../Tables/Edaphics_means.csv", stringsAsFactors = FALSE)
-kable(anova_results_edaph, escape = FALSE, caption = "Table 1: ANOVA Results for edaphic and ecological variables")
+kable(anova_results_edaph, escape = FALSE, caption = "Table3: ANOVA Results for edaphic and ecological variables")
 ```
+
+
+
+
+
