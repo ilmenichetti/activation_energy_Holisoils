@@ -143,7 +143,7 @@ write.csv(posteriors_summary_timevar, file="./Tables/posteriors_summary_timevar.
 
 treat_year_factor <- droplevels(interaction(processed_data_filtered$treatment, (year(processed_data_filtered$date)-2021)))
 
-png("./Figures/posteriors_temp_timevar.png", height = 2000, width = 4000, res=350)
+png("./Figures/Appendix/posteriors_temp_timevar.png", height = 2000, width = 4000, res=350)
 par(mfrow=c(1,2))
 E_0_densities_indA_Moy_timevar <- list()
 E_0_box_indA_Moy_timevar <- list()
@@ -161,7 +161,7 @@ for(i in 1:stan_data$treat_year_N){
 dev.off()
 
 
-png("./Figures/posteriors_boxplots_Ea_timevariant.png", height = 1500, width = 3500, res= 300)
+png("./Figures/Appendix/posteriors_boxplots_Ea_timevariant.png", height = 1500, width = 3500, res= 300)
 par(mar=c(8,3,1.5,0))
 bp <- boxplot(E_0_box_indA_Moy_timevar,
               names = levels(treat_year_factor), las=2, main = "A", cex.axis =0.5)

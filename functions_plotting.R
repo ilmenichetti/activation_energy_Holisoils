@@ -1,6 +1,6 @@
 
 
-png("./Figures/Temp.png", width = 2000, height = 2000, res=300)
+png("./Figures/Appendix/Temp_function.png", width = 2000, height = 2000, res=300)
 temp = seq(0,45)
 xi_temp = exp(-311.9924/ ((temp+ 273.15) - 227.13));
 
@@ -10,7 +10,7 @@ plot(temp, xi_temp, type = "l", main = "Loyd-Taylor",
 dev.off()
 
 
-png("./Figures/Moist.png", width = 2000, height = 2000, res=300)
+png("./Figures/Appendix/Moist_function.png", width = 2000, height = 2000, res=300)
 
 ### From Sierra SoilR
 fW.Moyano <- function(theta, a = 3.11, b = 2.42) {
@@ -26,7 +26,7 @@ plot(th, xi, type = "l", main = "Moyano 2013",
 dev.off()
 
 
-png("./Figures/Season.png", width = 2000, height = 2000, res=300)
+png("./Figures/Appendix/Season_function.png", width = 2000, height = 2000, res=300)
 
 amplitude=0.1183339
 day_year = seq(1:365)

@@ -21,7 +21,6 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 # Abstract
-TEST CHANGE
 
 
 # Introduction
@@ -180,16 +179,28 @@ kable(df, format = "pipe", caption = "Model parameters stratification and priors
 On a more limited subset (only Spain), we tested a more extensive random forest model in order to test the predictive power of other variables on the respiration. The model had structure as:  
 $$
 \begin{aligned}
-Rh(t) \sim f(trees, DBH, BD, por, pH, P, N_{tot}, C{tot}, biom_{fungi}, biom_{bact}, \\
-biom_{act}, biom_{gram+}, biom_{gram-}, biom_{tot}, T(t), theta_v(t), treatment)
+Rh(t) \sim f(trees,  treatment, DBH, BA, pH, BD, 
+P, N, C_{stocks}, \text{fungi\_biomass}, 
+biom_{fungi}, biom_{bact},\\
+biom_{act},biom_{gram+}, biom_{gram-}, 
+biom_{tot}, \frac{biom_{fungi}}{biom_{bact}}, 
+T_{soil}, M_{soil}, month)
 \end{aligned}
 $$
-We included in this model tree density in plants ha$^{-1}$ ($trees$), average diameter at breast height ($DBH$), bulk density ($BD$), porosity ($por$), pH, phosophorous ($P$), total nitrogen ($N_{tot}$), total carbon ($C_{tot}$), fungal biomass ($biom_{fungi}$), bacterial biomass ($biom_{bact}$), actinomycetes biomass ($biom_{act}$), gram+ bacterial biomass ($biom_{gram+}$), gram- bacterial biomass ($biom_{gram-}$), total biomass ($biom_{tot}$), as well as variables mentioned above.  
+
+We included in this model tree density in plants ha$^{-1}$ ($trees$), average diameter at breast height ($DBH$), basal area ($BA$),  pH, bulk density ($BD$), phosophorous ($P$), total nitrogen ($N}$), carbon stocks ($C_{stocks$), fungal biomass ($biom_{fungi}$), bacterial biomass ($biom_{bact}$), actinomycetes biomass ($biom_{act}$), gram+ bacterial biomass ($biom_{gram+}$), gram- bacterial biomass ($biom_{gram-}$), total biomass ($biom_{tot}$), fungi:bacteria ratio, soil temperature ($T_{soil}$), soil moisture  ($M_{soil}$) and month of the year.
 This model was tested only on a subset of the dataset (only the sites in Spain), for which all the additional variables were available.
 The aim of this model was to test the predictive potential of any of these additional variables, in order to to explore eventual correlations and possible related processes. The choice of a random forest model over a more conventional linear model is motivated by the capacity of the former to consider more complex relationships and interactions, on top of the convenience of being able to assess quantitatively the predictive potential of each variable by estimating relative variable importance.
 
 ## Machine learning variance decomposition on enzymes
-
+$$
+\begin{aligned}
+Rh(t) \sim f(trees, treatment, BA, BD, \\
+\beta_{\text{gluco}}, \text{acid\_phos}, \beta_{\text{xylo}}, \text{chitise}, \\
+\text{cellobiohydrolase}, \beta_{\text{galacto}}, \alpha_{\text{gluco}}, \text{lipase}, \\
+\text{CO}_2\text{\_flux\_norm}, T_1\text{\_soil}, \text{Soil\_moist}, \text{month})
+\end{aligned}
+$$
 
 
 
@@ -201,7 +212,8 @@ The aim of this model was to test the predictive potential of any of these addit
 ![Climatic parameters and respirations measured at the sites (mean values after loess interpolation with span = 0.5). Please notice thot not every time series covers the same period of time. Red shades = France, green shades = Romania, blue shades = Spain](../Figures/climatedata_means.png){width=60%}
 
 ## Edaphic and biological variables
-![Fit of the two benchmark machine learning models, linear (a) and random forest (b)](../Figures/Appendix/enzymes_boxplots.png){width=80%}
+![Fit of the two benchmark machine learning models, linear (a) and random forest (b)](../Figures/enzymes_boxplots.png){width=80%}
+![Fit of the two benchmark machine learning models, linear (a) and random forest (b)](../Figures/edaphic_boxplots.png){width=80%}
 
 
 
@@ -212,23 +224,20 @@ The aim of this model was to test the predictive potential of any of these addit
 ![Fit of the parametric model,  constant `E_a`](../Figures/fit_model_validation.png){width=60%}
 
 
-## Parametric model posteriors,  constant `E_a` 
+## Parametric model posteriors, constant `E_a` 
 
-![Posteriors of the parameters varying as a function of treatments](../Figures/posteriors_boxplots.png){width=60%}
+![Posteriors of the parameters varying as a function of treatments, `E_a` constant over time](../Figures/posteriors_boxplots.png){width=60%}
 
 
 ## Parametric model posteriors,  time-variant `E_a` 
 ![Posteriors of the `E_a` parameter varying as a function of treatments and sampling year](../Figures/timeseries_Ea_timevariant.png){width=60%}
 
 
-## Machine learning variance decomposition: predicting the whole dataset based on ecological variables
-The fitness of the detailed random forest model (fitted only on data from Spain) was the highest of all the models we tested, unsurprisingly given the huge amount of predictors compared with all other models.   
-Soil temperature and moisture resulted the most important variables in predicting respiration from each site by far, followed by edaphic characteristics of the site (density and porosity), then by treatment, and then again by edaphic site characteristics (namely pH and total C). Only afterwards the first variable related to aboveground vegetation. Variables related to biomass, total and specific to microorganisms classes, come only later and did not seem particularly important.  
-![Fit of the detailed random forest model (a) and variable importance of the same model (b)](../Figures/variance_decomposition.png){width=50%}
+## Machine learning variance decomposition: predicting respiration based on edaphic, ecological and enzymatic data
 
-## Machine learning variance decomposition: predicting a substet based on soil enzymatic data
+![Fit of the detailed random forest model (a) and variable importance of the same model (b) for edaphics and ecological variables Only the 20 variables explaining most variance are shown here.](../Figures/variance_decomposition_edaphics.png){width=50%}
 
-![Fit of the detailed random forest model (a) and variable importance of the same model (b)](../Figures/variance_decomposition_enzyme.png){width=50%}
+![Fit of the detailed random forest model (a) and variable importance of the same model (b) for enzymatic activities. Only the 20 variables explaining most variance are shown here.](../Figures/variance_decomposition_enzyme.png){width=50%}
 
 
 
@@ -265,42 +274,43 @@ Any other variable than soil temperature and moisture did not seem to play a piv
 
 
 # Appendix
-![Posteriors of the scaling parameter, varying as a function of single plots](../Figures/posteriors_boxplots_A.png){width=60%}
+![Posteriors of the scaling parameter, varying as a function of single plots](../Figures/Appendix/posteriors_boxplots_A.png){width=60%}
 
 
-![Posteriors of the parameters of the temperature function, plotted as density distributions](../Figures/posteriors_temp.png)
+![Posteriors of the parameters of the temperature function, plotted as density distributions](../Figures/Appendix/posteriors_temp.png)
 
 
-![Posteriors of the parameters of the moisture function, plotted as density distributions](../Figures/posteriors_seasonality.png)
+![Posteriors of the parameters of the moisture function, plotted as density distributions](../Figures/Appendix/posteriors_seasonality.png)
 
 
-![Posteriors of the parameters of the seasonality function, plotted as density distributions](../Figures/posteriors_moisture.png)
+![Posteriors of the parameters of the seasonality function, plotted as density distributions](../Figures/Appendix/posteriors_moisture.png)
 
 ![Ratio (expressed as %) between the mean amplitude parameter and the mean measured respiration by treatment](../Figures/Amplitude_ratio.png)
 
 
 
 
-![Temperature scaling function](../Figures/Temp.png){width=50%}
+![Temperature scaling function](../Figures/Appendix/Temp_function.png){width=50%}
 
 
-![Moisture scaling function](../Figures/Moist.png){width=50%}
+![Moisture scaling function](../Figures/Appendix/Moist_function.png){width=50%}
 
 
 
-![Seasonality scaling function](../Figures/Season.png){width=50%}
+![Seasonality scaling function](../Figures/Appendix/Season_function.png){width=50%}
 
 
 
 ```{r, echo=FALSE}
-# Load necessary libraries
 library(knitr)
-
-# Read the CSV file
 anova_results <- read.csv("../Tables/Enzyme_means.csv", stringsAsFactors = FALSE)
-
-# Display the table with HTML superscripts
-kable(anova_results, escape = FALSE)
+kable(anova_results, escape = FALSE, caption = "Table 1: ANOVA Results for enzyme activities")
 ```
 
 
+
+```{r, echo=FALSE}
+library(knitr)
+anova_results_edaph <- read.csv("../Tables/Edaphics_means.csv", stringsAsFactors = FALSE)
+kable(anova_results_edaph, escape = FALSE, caption = "Table 1: ANOVA Results for edaphic and ecological variables")
+```

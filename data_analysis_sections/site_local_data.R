@@ -1,5 +1,6 @@
 
 png("./Figures/SOC.png", height=1800, width = 2000, res = 300)
+par(mar=c(10,5,1,1))
 boxplot(soil_data$C_stocks ~ interaction(soil_data$site, soil_data$treatment),names = names_treats,
         col = palette_treat_simplified,
         main = "SOC content",
@@ -9,30 +10,30 @@ dev.off()
 
 
 
-# define the number of runs of the MCMC
-N_RUNS = 5000
-
-# Determine the number of cores available
-num_cores <- detectCores()
-
-# fitting the model (in multicore mode)
-start <- Sys.time()
-fit_bytreat_indA_indEa_Moy_sin <- stan(
-  file = 'temp_moist_season_model_ind_Ea.stan',
-  data = stan_data,
-  iter = N_RUNS,
-  chains = 4,
-  cores = num_cores-1,  # Use all available cores
-  control = list(adapt_delta = 0.99, max_treedepth = 15)
-)
-end <- Sys.time()
-tot_time <- end - start
-tot_time
-
-post_bytreat_indA_indEa_Moy <- extract(fit_bytreat_indA_indEa_Moy_sin)
-
-Ea_vector<- colMeans(post_bytreat_indA_indEa_Moy$Ea)
-
+# # define the number of runs of the MCMC
+# N_RUNS = 5000
+#
+# # Determine the number of cores available
+# num_cores <- detectCores()
+#
+# # fitting the model (in multicore mode)
+# start <- Sys.time()
+# fit_bytreat_indA_indEa_Moy_sin <- stan(
+#   file = 'temp_moist_season_model_ind_Ea.stan',
+#   data = stan_data,
+#   iter = N_RUNS,
+#   chains = 4,
+#   cores = num_cores-1,  # Use all available cores
+#   control = list(adapt_delta = 0.99, max_treedepth = 15)
+# )
+# end <- Sys.time()
+# tot_time <- end - start
+# tot_time
+#
+# post_bytreat_indA_indEa_Moy <- extract(fit_bytreat_indA_indEa_Moy_sin)
+#
+# Ea_vector<- colMeans(post_bytreat_indA_indEa_Moy$Ea)
+#
 
 
 str(soil_data)

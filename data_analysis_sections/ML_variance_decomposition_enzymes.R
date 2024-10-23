@@ -62,18 +62,6 @@ rf_model_CO2_flux <- randomForest(CO2_flux_norm ~ . , data = rf_soil_data_train,
 range_plot = range(c(predict(rf_model_CO2_flux, newdata = rf_soil_data_valid),
                      rf_soil_data_valid$CO2_flux_norm))
 
-plot(predict(rf_model_CO2_flux, newdata = rf_soil_data_valid), rf_soil_data_valid$CO2_flux_norm, ylab="predicted", xlab="observed", main="RF model",
-     col=palette_treat[as.numeric(rf_soil_data_valid$treatment)], pch=as.numeric(rf_soil_data_valid$treatment), xlim=range_plot, ylim=range_plot)
-lm<-lm(rf_soil_data_valid$CO2_flux_norm ~ predict(rf_model_CO2_flux, newdata = rf_soil_data_valid))
-summary(lm)
-abline(a=0, b=1, col="black", lty=2)
-legend("topright", levels(rf_soil_data_valid$treatment), bty="n", pch=1:15, col = palette_treat)
-legend("bottomright", paste("R^2 =", round(summary(lm)$r.squared,3)), bty="n", pch=NA, col = NA)
-
-importance(rf_model_CO2_flux)
-varImpPlot(rf_model_CO2_flux)
-
-
 png("./Figures/variance_decomposition_enzyme.png", height = 3000, width = 1500, res = 300)
 par(mfrow=c(2,1))
 # the object range_plot comes from running the ML_model_benchmark.R file first
@@ -87,7 +75,7 @@ legend("bottomright", paste("R^2 =", round(summary(lm)$r.squared,3)), bty="n", p
 
 varimp_model_CO2_flux <- varImp(rf_model_CO2_flux)
 varimp_model_CO2_flux[order(varimp_model_CO2_flux$Overall),]
-par(mar=c(1,10,2,2))
+par(mar=c(3,10,2,2))
 barplot(varimp_model_CO2_flux[order(varimp_model_CO2_flux$Overall),], las=2,
         names.arg = rownames(varimp_model_CO2_flux)[order(varimp_model_CO2_flux$Overall)], horiz = T)
 dev.off()

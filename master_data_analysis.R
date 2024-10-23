@@ -208,6 +208,7 @@ source("./data_analysis_sections/ML_model_benchmarks.R")
 source("./data_analysis_sections/parametric_model_fitting_time_variant.R")
 source("./data_analysis_sections/parametric_model_fitting.R")
 
+source("./data_analysis_sections/Q10_plotting.R")
 
 
 ## Working on the residuals

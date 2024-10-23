@@ -1,7 +1,7 @@
 
 ########### site micrometeorology
 
-png("./Figures/climatedata.png", height=2500, width = 2000, res=300)
+png("./Figures/Appendix/climatedata.png", height=2500, width = 2000, res=300)
 par(mfrow=c(3,2), mar=c(2,5,1,1))
 
 data_meteo = data.frame(Date = processed_data_filtered_preprocess$date,
@@ -154,7 +154,7 @@ legend("topright", paste("Average moisture"), pch=NA, bty="n")
 
 plot(average_resp[average_resp$Treat == treats[1],]$DateNumeric, pch=NA, xlab = "Date", ylab = expression(Respiration ~ (g ~ C ~ kg^{-1})),
      average_resp[average_resp$Treat == treats[1],]$AverageResp, main = "", axes = FALSE,
-     xlim = range(extended_date_range), col = custom_palette_temp, ylim=c(0,0.85))
+     xlim = range(extended_date_range), col = custom_palette_temp, ylim=c(0,1))
 axis(1, at = seq(min(extended_date_range), max(extended_date_range), length.out = 10),
      labels = as.Date(seq(min(extended_date_range), max(extended_date_range), length.out = 10), origin = "1970-01-01"))
 axis(2)

@@ -5,12 +5,8 @@ library(parallel)
 # Set the number of cores to use
 options(mc.cores = parallel::detectCores())
 
-# test a bit of the data
 
-plot(density(processed_data_filtered$CO2_flux_norm))
-polygon(density(processed_data_filtered$CO2_flux_hour))
-range(processed_data_filtered$CO2_flux_norm)
-range(processed_data_filtered$CO2_flux_hour)
+Q10_range = range(processed_data_filtered$T1_soil)
 
 
 # Data list for Stan
@@ -23,7 +19,8 @@ stan_data <- list(N = length(processed_data_filtered$CO2_flux_norm),
                   M = processed_data_filtered$Soil_moist,
                   Pl = length(levels(processed_data_filtered$plot_id)),
                   plot_id = as.integer(processed_data_filtered$plot_id),
-                  day_year = yday(as.Date(processed_data_filtered$date))
+                  day_year = yday(as.Date(processed_data_filtered$date)),
+                  Q10_range = Q10_range
 )
 
 str(stan_data)
@@ -36,7 +33,8 @@ stan_data_valid <- list(N = length(validation_data$CO2_flux_norm),
                         M = validation_data$Soil_moist,
                         Pl = length(levels(validation_data$plot_id)),
                         plot_id = as.integer(validation_data$plot_id),
-                        day_year = yday(as.Date(validation_data$date))
+                        day_year = yday(as.Date(validation_data$date)),
+                        Q10_range = Q10_range
 )
 
 #quick check of the data...
@@ -82,6 +80,8 @@ mean(post_bytreat_indA_Moy$Ea)
 mean(post_bytreat_indA_Moy$A)
 mean(post_bytreat_indA_Moy$xi_temp)
 mean(post_bytreat_indA_Moy$xi_moist)
+
+
 
 
 posteriors_summary <- data.frame(
@@ -144,7 +144,7 @@ write.csv(posteriors_summary, file="./Tables/posteriors_summary.csv")
 
 
 
-png("./Figures/posteriors_temp.png", height = 2000, width = 4000, res=350)
+png("./Figures/Appendix/posteriors_temp.png", height = 2000, width = 4000, res=350)
 par(mfrow=c(1,2))
 E_0_densities_indA_Moy <- list()
 E_0_box_indA_Moy <- list()
@@ -179,7 +179,7 @@ dev.off()
 barplot(rep(1, length(palette_treat)), col = palette_treat, border = NA, space = 0)
 
 
-png("./Figures/posteriors_seasonality.png", height = 2000, width = 4000, res=350)
+png("./Figures/Appendix/posteriors_seasonality.png", height = 2000, width = 4000, res=350)
 par(mfrow=c(1,2))
 peak_densities_indA_Moy <- list()
 peak_box_indA_Moy <- list()
@@ -212,7 +212,7 @@ dev.off()
 
 
 
-png("./Figures/posteriors_moisture.png", height = 2000, width = 4000, res=350)
+png("./Figures/Appendix/posteriors_moisture.png", height = 2000, width = 4000, res=350)
 par(mfrow=c(1,2))
 a_densities_indA_Moy <- list()
 a_box_indA_Moy <- list()
@@ -308,7 +308,7 @@ add_shading_to_boxplot(bp, density = density_palette, angle = angle_palette)
 legend("topright", "(e)", pch=NA, bty="n")
 dev.off()
 
-png("./Figures/posteriors_boxplots_A.png", height = 1500, width = 3500, res= 300)
+png("./Figures/Appendix/posteriors_boxplots_A.png", height = 1500, width = 3500, res= 300)
 par(mar=c(6,3,1.5,0))
 bp <- boxplot(A_box_indA_Moy, names = levels(processed_data_filtered$plot_id), las=2, col = palette_plot, main = "A", cex.axis =0.5)
 dev.off()
@@ -316,7 +316,9 @@ dev.off()
 # Rhat
 max(summary(fit_bytreat_indA_Moy_sin)$summary[,"Rhat"], na.rm = T)
 
-
+bp <- boxplot(b_box_indA_Moy, names = names_treats, las=2, col = palette_treat_simplified, main = "b")
+add_shading_to_boxplot(bp, density = density_palette, angle = angle_palette)
+legend("topright", "(e)", pch=NA, bty="n")
 
 # Calculate mean and standard deviation of predictions for each data point
 predicted_means_indA_Moy <- apply(post_bytreat_indA_Moy$model_resp, 2, mean)
@@ -338,24 +340,36 @@ legend("bottomright", paste("R^2 =", round(summary(lm)$r.squared,3)), bty="n", p
 dev.off()
 
 
-# independent validations
+png("./Figures/Appendix/posteriors_q10.png", height = 1500, width = 2500, res= 300)
+q10_densities_indA_Moy <- list()
+q10_box_indA_Moy <- list()
+plot( density(post_bytreat_indA_Moy$q10[,1]), xlim=c(range(post_bytreat_indA_Moy$q10)[1]*0.9, range(post_bytreat_indA_Moy$q10)[2]*1.1),
+      ylim=c(0,0.22), xlab = expression('q'[10]), col=NA, main="")
+for(i in 1:stan_data$Tr){
+  q10_densities_indA_Moy[[i]] <- density(post_bytreat_indA_Moy$q10[,i])
+  q10_box_indA_Moy[[i]] <- q10_densities_indA_Moy[[i]]$x
+  polygon(q10_densities_indA_Moy[[i]], col=add.alpha(palette_treat[i],0.4), border = add.alpha(palette_treat[i],0.8))
 
+  which_max_y  <- which.max(q10_densities_indA_Moy[[i]]$y)
+  text(q10_densities_indA_Moy[[i]]$x[which_max_y], q10_densities_indA_Moy[[i]]$y[which_max_y]+0.002,
+       levels(processed_data_filtered$treatment)[i], col=palette_treat[i], cex=0.8)
+}
+dev.off()
 
-dim(post_bytreat_indA_Moy$amplitude)
-dim(post_bytreat_indA_Moy$peak_day)
-dim(post_bytreat_indA_Moy$Ea)
-dim(post_bytreat_indA_Moy$A)
-dim(post_bytreat_indA_Moy$a)
-dim(post_bytreat_indA_Moy$b)
+png("./Figures/posteriors_boxplots_q10.png", height = 1500, width = 1500, res= 300)
+par(mar=c(8.5,3,1.5,0))
+bp <- boxplot(q10_box_indA_Moy, names = names_treats, las=2, col = palette_treat_simplified,
+              main = bquote('Q'['10,(T=' * .(round(Q10_range[1])) * ',' * .(round(Q10_range[2])) * ')']),  cex.axis =0.8)
+add_shading_to_boxplot(bp, density = density_palette, angle = angle_palette)
+dev.off()
 
-
-str(post_bytreat_indA_Moy)
-
-mean(post_bytreat_indA_Moy$amplitude)/
-  mean(stan_data$resp) * 100
 
 library(dplyr)
-averaged_data <- as.data.frame(stan_data) %>%
+
+# Convert stan_data to a data frame, excluding Q10_range
+stan_data_df <- as.data.frame(stan_data[-which(names(stan_data) == "Q10_range")])
+# Group by treatment and calculate averages
+averaged_data <- stan_data_df %>%
   group_by(treatment) %>%
   summarise(
     avg_resp = mean(resp, na.rm = TRUE),
@@ -363,47 +377,19 @@ averaged_data <- as.data.frame(stan_data) %>%
     avg_M = mean(M, na.rm = TRUE)
   )
 
-# custom function to add the shading to the barplots
-add_shading_to_barplot <- function(bar_positions, bar_heights, density, angle, x_offset = 0.5, col = "black") {
-  # Loop through each bar in the barplot
-  for (i in 1:length(bar_positions)) {
-    # Check if density and angle are not NA
-    if (!is.na(density_palette[i]) && !is.na(angle_palette[i])) {
-      # Calculate the positions for shading
-      xleft <- bar_positions[i] - x_offset  # left x position for shading
-      xright <- bar_positions[i] + x_offset # right x position for shading
-      ybottom <- 0  # bottom of the bar (assumed to be at y=0)
-      ytop <- bar_heights[i]  # top of the bar
-
-      # Add shading using the rect function with angle and density
-      rect(xleft, ybottom, xright, ytop,
-           density = density_palette[i], angle = angle_palette[i],
-           col = col, border = NA)
-    }
-  }
-}
-
-
 png("./Figures/Amplitude_ratio.png", width = 2000, height=2000, res=300)
 par(mar=c(12,5,2,2))
 bar_positions <-barplot(colMeans(post_bytreat_indA_Moy$amplitude)/averaged_data$avg_resp*100,
-                        names.arg = names_treats, las=2, col = palette_treat_simplified, ylab= "mean amplitude (as % of mean respiration)", ylim=c(0,40))
+                        names.arg = names_treats, las=2, col = palette_treat_simplified, ylab= "mean amplitude (as % of mean respiration)", ylim=c(-40,40))
 add_shading_to_barplot(bar_positions = bar_positions, bar_heights = colMeans(post_bytreat_indA_Moy$amplitude)/averaged_data$avg_resp*100,
                        density = density_palette, angle = angle_palette)
 box()
 dev.off()
 
 
-dim(post_bytreat_indA_Moy$res)
-dim(post_bytreat_indA_Moy$Ea)
-dim(post_bytreat_indA_Moy$A)
-
-### decomposition of the variance
 
 
-
-
-
+# fully independent validation
 
 #load the model for forward runs
 source("temp_moist_season_model.R")

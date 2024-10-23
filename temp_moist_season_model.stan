@@ -10,6 +10,8 @@ data {
   vector[N] temp;        // Temperature data
   vector[N] resp;        // Respiration rates
   vector[N] M;           // Soil moisture (volumetric, cm3 cm^-3)
+  vector[2] Q10_range;        // Number of data points
+
 }
 
 transformed data {
@@ -69,6 +71,7 @@ generated quantities {
   vector[N] xi_temp;
   vector[N] sine_wave;
   vector[N] res;
+  vector[Tr] q10;
 
   // Model prediction
   for (i in 1:N) {
@@ -79,4 +82,11 @@ generated quantities {
     // model_resp[i] =   (xi_temp[i] * xi_moist[i]);
     res[i] = model_resp[i] - resp[i];
   }
+
+  //q10 calculation
+  for (q in 1:Tr){
+  q10[q] = exp((Ea[q] / ((Q10_range[1] + 273.15) - T_0)) - (Ea[q] / ((Q10_range[2] + 273.15) - T_0)));
+  }
+
+
 }
