@@ -26,7 +26,7 @@ parameters {
   vector<lower=3.11*0.25, upper=3.11*1.75>[Tr] a;    // scaling of MOyano function (simplified)
   vector<lower=2.42*0.25, upper=2.42*1.75>[Tr] b;     // scaling of MOyano function (simplified
 
-  vector<lower=0, upper=0.5>[Tr] amplitude;   // Amplitude for each treatment
+  vector<lower=-0.5, upper=0.5>[Tr] amplitude;   // Amplitude for each treatment
   vector<lower=0, upper=365>[Tr] peak_day;  // Peak day for each treatment
 
 }
@@ -51,7 +51,7 @@ model {
   Ea ~ normal(398.5, 50);
   a ~ normal(3.11, 0.1);
   b ~ normal(2.42, 0.1);
-  amplitude ~ uniform(0, 0.5);
+  amplitude ~ normal(0, 0.25);
   peak_day ~ normal(175, 50); #centered on the 24th of June
 
   // sigma ~ normal(0, 1);

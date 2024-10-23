@@ -13,11 +13,9 @@ library(parallel)
 
 set.seed(123)
 
-#TODO color code in the boxplot and Ea, they don't match. Compare and find the error
-
 #TODO Q10
 
-
+#TODO plotting enzymatic activities and other variables (boxplots)
 
 
 

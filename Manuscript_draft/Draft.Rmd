@@ -64,7 +64,7 @@ The same five soil cores used for chemical analyses were used to estimate soil m
 In order to ensure a robust validation, all models have been validated with a split approach, keeping two completely independent data sets (80% of the points for training and 20% validation). Given the size of the dataset, we considered this approach more reliable than any crossvalidation approach.
 
 
-## Parametric model
+## Parametric model, constant `E_a`
 We defined a parametric model to consider all the three effects on respiration we hypothesized. The first is the influence of temperature, then the influence of soil moisture, and then a seasonal component which is assumed to be roughly proportional to the interactions of autotrophic respiration (which we hypothesized following a seasonal pattern).
 Temperature and moisture scaling interact linearly, while seasonality was assumed additive:  
 $$
@@ -113,7 +113,7 @@ $$
 $$
 Both the terms $ampl_j$ and $peak_j$ are described by Bayesian priors. Variance is by treatment.
 We assumed that the variability in seaslonalityis driven by treatments ($j$). 
-The prior distribution for the term $ampl$ was assumed as $\sim \mathcal{N}(0, 0.5)$, so assuming as mean no seasonality effect, and for the term $peak$ was assumed as $\sim \mathcal{N}(175, 50)$, so assuming as mean for the peak the 24th of June (Midsummer day).
+The prior distribution for the term $ampl$ was assumed as $\sim \mathcal{N}(0, 0.5)$, so assuming as mean no seasonality effect, and for the term $peak$ was assumed as $\sim \mathcal{N}(175, 50)$, so assuming as mean for the peak the 24th of June (Midsummer day). Amplitude can be negative (this is just reverting the order of peaks and valleys of the sine function).
 
 
 ## Model benchmark
@@ -126,6 +126,55 @@ The rationale behind these choices is to offer two extremes to compare the fitne
 ## Model extrapolation of increased temperature effect on decomposition
 Once we calibrated our parametric model, we could test the consequences of an increase in temperature on decomposition by driving the model with the same dataset except temperature was increased by 5&deg;C. This resulted in a more immediate way of visualizing the impact of a different temperature sensitivity of organic material.
 
+
+## Parametric model, time-variant `E_a`
+In order to test the hypothesis of an eventual variation of the activation energy of the decomposing material over time without any assumption on the function of variation, we fitted a version of the model where the $E_a$ parameter was stratified in order to let it vary independently for each treatment and year of sampling. 
+
+
+```{r, echo=FALSE}
+# Load necessary package
+library(knitr)
+
+# Create the data frame
+df <- data.frame(
+  Parameter = c("A", "Ea", "a", "b", "amplitude", "peak_day"),
+  Description = c(
+    "Pre-exponential factor (log)", 
+    "Activation energy (Ea/R)", 
+    "Scaling of Moyano function (moisture, linear term)", 
+    "Scaling of Moyano function (moisture, quadratic term)", 
+    "Amplitude of seasonal sine wave", 
+    "Peak day of seasonal sine wave"
+  ),
+  `Stratification Level, const Eₐ` = c(
+    "Plot", 
+    "Treatment", 
+    "Treatment", 
+    "Treatment", 
+    "Treatment", 
+    "Treatment"
+  ),
+  `Stratification Level, var Eₐ` = c(
+    "Plot", 
+    "Treatment-year", 
+    "Treatment", 
+    "Treatment", 
+    "Treatment", 
+    "Treatment"
+  ),
+    `Prior Values` = c(
+    "normal(30, 100)", 
+    "normal(398.5, 50)", 
+    "normal(3.11, 0.1)", 
+    "normal(2.42, 0.1)", 
+    "normal(0, 0.25)", 
+    "normal(175, 50)"
+    )
+)
+
+# Generate the table using kable
+kable(df, format = "pipe", caption = "Model parameters stratification and priors")
+```
 
 ## Machine learning variance decomposition
 On a more limited subset (only Spain), we tested a more extensive random forest model in order to test the predictive power of other variables on the respiration. The model had structure as:  
@@ -142,27 +191,34 @@ The aim of this model was to test the predictive potential of any of these addit
 ## Machine learning variance decomposition on enzymes
 
 
+
+
+
+
 # Results
 
 ## Sites microclimate
 ![Climatic parameters and respirations measured at the sites (mean values after loess interpolation with span = 0.5). Please notice thot not every time series covers the same period of time. Red shades = France, green shades = Romania, blue shades = Spain](../Figures/climatedata_means.png){width=60%}
 
+## Edaphic and biological variables
+![Fit of the two benchmark machine learning models, linear (a) and random forest (b)](../Figures/Appendix/enzymes_boxplots.png){width=80%}
+
 
 
 ## Benchmark models and parametric model fit
-
 ![Fit of the two benchmark machine learning models, linear (a) and random forest (b)](../Figures/fit_ML_validation.png){width=80%}
 
 
-![Fit of the parametric model](../Figures/fit_model_validation.png){width=60%}
+![Fit of the parametric model,  constant `E_a`](../Figures/fit_model_validation.png){width=60%}
 
 
-## Parametric model posteriors 
+## Parametric model posteriors,  constant `E_a` 
 
 ![Posteriors of the parameters varying as a function of treatments](../Figures/posteriors_boxplots.png){width=60%}
 
-![Posteriors of the scaling parameter, varying as a function of single plots](../Figures/posteriors_boxplots_A.png){width=60%}
 
+## Parametric model posteriors,  time-variant `E_a` 
+![Posteriors of the `E_a` parameter varying as a function of treatments and sampling year](../Figures/timeseries_Ea_timevariant.png){width=60%}
 
 
 ## Machine learning variance decomposition: predicting the whole dataset based on ecological variables
@@ -209,6 +265,8 @@ Any other variable than soil temperature and moisture did not seem to play a piv
 
 
 # Appendix
+![Posteriors of the scaling parameter, varying as a function of single plots](../Figures/posteriors_boxplots_A.png){width=60%}
+
 
 ![Posteriors of the parameters of the temperature function, plotted as density distributions](../Figures/posteriors_temp.png)
 
