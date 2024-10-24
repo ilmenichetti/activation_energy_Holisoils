@@ -28,9 +28,13 @@ The soil is one of the largest terrestrial reservoirs of carbon, containing appr
 
 Forest management have the potential to affect respiration rates by modifying the microclimate. Removal of trees by forest logging increases the exposure of soil to temperature fluctuations and alter the soil water content either by decreasing water through soil evaporation or by increasing it by reducing the transpiration of water by trees (Zhang et al 2018). The degree of the response of soil will be dependent on the severity of the forest intervention. Thus, more severe forestry intervention such as clear-cuts may increase soil moisture, enhance heat and frost damage (Kovaks et al 2019; Zhang et al 2018) and it seems to reduce respiration rates (Yang et el 2022; Zhang et al 2018). Less severe interventions such as thinning, have shown to increase respiration in broadleaf forests in a meta-analysis (Zhang et al 2018). Negative effects of forest management on soil could be buffered by the addition of forest residues on soil (i.e., slash addition), which can improve the microclimatic conditions, nutrient fertility and biodiversity (ref). We do not know whether the response of soil CO2 effluxes to the microclimatic conditions (i.e. soil temperature and moisture) differs among different forest management strategies. Understanding the sensitivity of respiration to microclimate under different forest management strategies is crucial in a context of climate-smart forestry (CSF) development.
 
-Here, we hypothesized that logging of trees will decrease the respiration rates because of the strong decrease in vegetation activity and microbiota associated. In turn, addition of slash will provide labile organic matter to decompose increasing the respiration rates. We also hypothesized that the variation in soil respiration would be mainly dependent on microclimatic variables (soil temperature and moisture), especially in the management treatments where vegetation was removed, since heterotrophic respiration will prevail over autotrophic respiration. Moreover, the sensitivity of soil respiration to microclimatic conditions will depend on the type of climate/forest, being the Mediterranean the most sensitive as the microbial communities will be better adapted to the strong seasonal changes in water availability. 
+Here, we hypothesized that:
+(1) logging of trees will decrease the respiration rates because of the strong decrease in vegetation activity and microbiota associated. In turn, addition of slash will provide labile organic matter to decompose increasing the respiration rates. 
+(2) the variation in soil respiration would be mainly dependent on microclimatic variables (soil temperature and moisture), especially in the management treatments where vegetation was removed, since heterotrophic respiration will prevail over autotrophic respiration, and where the litter layer (slash) was removed
+(3) the sensitivity of soil respiration to microclimatic conditions will also depend on the type of climate/forest, being the Mediterranean the less sensitive as the microbial communities will be better adapted to the strong seasonal changes in water availability.
+(4) the sensitivity of respiration to microclimate will decrease as the time passes since the disturbance because of new fresh C input from the growth of understory vegetation
 
-To test these hypotheses, we have monthly recorded data on soil respiration and microclimate in three replicated Quercus forests across Europe subjected to different forest management strategies during three years. We have analysed the sensitivity of soil respiration to microclimate (i.e., soil temperature and soil moisture) by constructing a mechanistic model…
+To test these hypotheses, we have recorded data on soil respiration and microclimate every month in three replicated Quercus forests across Europe subjected to different forest management strategies during three years. We have analysed the sensitivity of soil respiration to microclimate (i.e., soil temperature and soil moisture) by constructing a mechanistic parametric model and compared to a non-parametric model (i.e., random forest).
 
 
 # Material and methods
@@ -61,7 +65,7 @@ The same five soil cores used for chemical analyses were used to estimate soil m
 
 
 ## Validation
-In order to ensure a robust validation, all models have been validated with a split approach, keeping two completely independent data sets (80% of the points for training and 20% validation). Given the size of the dataset, we considered this approach more reliable than any crossvalidation approach.
+In order to ensure a robust validation, all models have been validated with a split approach, keeping two completely independent data sets (80% of the points for training and 20% validation). Given the size of the dataset, we considered this approach more reliable than any cross-validation approach.
 
 
 ## Parametric model, constant `E_a`
@@ -97,7 +101,7 @@ $$
 \xi_{temp(t,j)} = A_{k} \cdot e^{\frac{-Ea_j}{(T(t)+273.15)-T_0)}}
 $$
 The two parameters $A_{k}$ and $E_a$ are represented by Bayesian priors.  
-For the temperature scaling we assumed that the activation energy term $E_a$ (which defines roughly the slope of the relationship) is driven by treatments ($j$) while the linear rescaling term $A_{k}$ is driven by the substrate at the single plot level ($k$). This because substrate (organic matter) amount is usually highly variable in soil even at small spatial scales, while its quality, which defines its temperature sensitivity, is assumed to follow the inputs quality which are relatively uniform over each treatments.  
+For the temperature scaling we assumed that the activation energy term $E_a$ (which defines roughly the slope of the relationship) is driven by treatments ($j$) while the linear rescaling term $A_{k}$ is driven by the substrate at the single plot level ($k$). This is because substrate (organic matter) amount is usually highly variable in soil even at small spatial scales, while its quality, which defines its temperature sensitivity, is assumed to follow the inputs quality which are relatively uniform over each treatments.  
 The effect of the rescaling term $A_{k}$ is included in the function for temperature scaling to keep the convention of the original formulation of the equation, but it could be brought outside since it just a linear interaction.  
 The prior distribution for the term $A$ was assumed as $\sim \mathcal{N}(300, 100)$ and for the term $E_a$ was assumed as $\sim \mathcal{N}(398.5, 50)$, utilizing as mean values the values  in @Lloyd.1994l68 and setting up conservatives standard deviations.
 
@@ -112,7 +116,7 @@ $$
 \end{aligned}
 $$
 Both the terms $ampl_j$ and $peak_j$ are described by Bayesian priors. Variance is by treatment.
-We assumed that the variability in seaslonalityis driven by treatments ($j$). 
+We assumed that the variability in seasonality is driven by treatments ($j$). 
 The prior distribution for the term $ampl$ was assumed as $\sim \mathcal{N}(0, 0.5)$, so assuming as mean no seasonality effect, and for the term $peak$ was assumed as $\sim \mathcal{N}(175, 50)$, so assuming as mean for the peak the 24th of June (Midsummer day). Amplitude can be negative (this is just reverting the order of peaks and valleys of the sine function).
 
 
