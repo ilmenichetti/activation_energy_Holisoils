@@ -214,11 +214,11 @@ $$
 # Results
 
 ## Sites microclimate
-![Climatic parameters and respirations measured at the sites (mean values after loess interpolation with span = 0.5). Please notice thot not every time series covers the same period of time. Red shades = France, green shades = Romania, blue shades = Spain](../Figures/climatedata_means.png){width=60%}
+![Climatic parameters (soil temperature and soil moisture) and respiration measured at the study sites (mean values per month and treatment after loess interpolation with span = 0.5). Please notice thot not every time series covers the same period of time. Red shades = France, green shades = Romania, blue shades = Spain](../Figures/climatedata_means.png){width=60%}
 
 ## Edaphic and biological variables
-![Fit of the two benchmark machine learning models, linear (a) and random forest (b)](../Figures/enzymes_boxplots.png){width=80%}
-![Fit of the two benchmark machine learning models, linear (a) and random forest (b)](../Figures/edaphic_boxplots.png){width=80%}
+![Boxplots of soil microbial biomass and enzymatic activities per disturbance treatment and study site. Red shades = France, green shades = Romania, blue shades = Spain](../Figures/enzymes_boxplots.png){width=80%}
+![Boxplots of stand characteristics and soil physical-chemical properties per disturbance treatment and study site. Red shades = France, green shades = Romania, blue shades = Spain](../Figures/edaphic_boxplots.png){width=80%}
 
 
 
