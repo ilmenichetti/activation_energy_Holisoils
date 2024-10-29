@@ -1,8 +1,9 @@
 
+
 png("./Figures/SOC.png", height=1800, width = 2000, res = 300)
-par(mar=c(10,5,1,1))
-boxplot(soil_data$C_stocks ~ interaction(soil_data$site, soil_data$treatment),names = names_treats,
-        col = palette_treat_simplified,
+par(mar=c(13,5,1,1))
+boxplot(soil_data$C_stocks ~ interaction(soil_data$site, soil_data$treatment),names = levels(interaction(soil_data$site, soil_data$treatment)),
+        # col = palette_treat_simplified,
         main = "SOC content",
         ylab = expression(SOC~(Mg~ha^-1)),
         xlab="", las=2)

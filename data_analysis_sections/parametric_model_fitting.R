@@ -6,7 +6,10 @@ library(parallel)
 options(mc.cores = parallel::detectCores())
 
 #Q10 range, the two temperatures where to calculate Q10
-Q10_range = range(processed_data_filtered$T1_soil)
+#Q10_range = range(processed_data_filtered$T1_soil)
+Q10_range = c(15,25)
+
+
 
 #reordering the treatments for plotting uniformity
 processed_data_filtered$treatment <- factor(processed_data_filtered$treatment, levels = c("control.france","thinning_slash.france","thinning_no_slash.france",
@@ -57,7 +60,7 @@ polygon(density(validation_data$CO2_flux_norm))
 
 
 # define the number of runs of the MCMC
-N_RUNS = 7000
+N_RUNS = 5000
 
 # Determine the number of cores available
 num_cores <- detectCores()
@@ -93,9 +96,25 @@ mean(post_bytreat_indA_Moy$Ea)
 mean(post_bytreat_indA_Moy$A)
 mean(post_bytreat_indA_Moy$xi_temp)
 mean(post_bytreat_indA_Moy$xi_moist)
+mean(post_bytreat_indA_Moy$q10)
+mean(post_bytreat_indA_Moy$xi_temp_high)
+mean(post_bytreat_indA_Moy$model_resp_low)
+mean(post_bytreat_indA_Moy$model_resp_high)
 
+length(post_bytreat_indA_Moy$q10)
+dim(post_bytreat_indA_Moy$q10)
+which(is.infinite(post_bytreat_indA_Moy$q10))
 
+i=111
+post_bytreat_indA_Moy$xi_temp_high[i]
+post_bytreat_indA_Moy$xi_temp_low[i]
+post_bytreat_indA_Moy$model_resp_low[i]
+post_bytreat_indA_Moy$model_resp_high[i]
+post_bytreat_indA_Moy$q10[i]
+post_bytreat_indA_Moy$sine_wave[i]
 
+as.numeric(post_bytreat_indA_Moy$q10)
+which(is.na((post_bytreat_indA_Moy$model_resp_high / post_bytreat_indA_Moy$model_resp_low)^(10 / (Q10_range[2] - Q10_range[1]))))
 
 posteriors_summary <- data.frame(
   mode_Ea = numeric(15),
@@ -189,7 +208,7 @@ for(i in 1:stan_data$Pl){
 }
 dev.off()
 
-barplot(rep(1, length(palette_treat)), col = palette_treat, border = NA, space = 0)
+#barplot(rep(1, length(palette_treat)), col = palette_treat, border = NA, space = 0)
 
 
 png("./Figures/Appendix/posteriors_seasonality.png", height = 2000, width = 4000, res=350)
@@ -327,7 +346,7 @@ bp <- boxplot(A_box_indA_Moy, names = levels(processed_data_filtered$plot_id), l
 dev.off()
 
 # Rhat
-max(summary(fit_bytreat_indA_Moy_sin)$summary[,"Rhat"], na.rm = T)
+# max(summary(fit_bytreat_indA_Moy_sin)$summary[,"Rhat"], na.rm = T)
 
 bp <- boxplot(b_box_indA_Moy, names = names_treats, las=2, col = palette_treat_simplified, main = "b")
 add_shading_to_boxplot(bp, density = density_palette, angle = angle_palette)
@@ -354,12 +373,17 @@ dev.off()
 
 
 png("./Figures/Appendix/posteriors_q10.png", height = 1500, width = 2500, res= 300)
+
+str(post_bytreat_indA_Moy$q10)
+length(stan_data$treatment)
+
 q10_densities_indA_Moy <- list()
 q10_box_indA_Moy <- list()
-plot( density(post_bytreat_indA_Moy$q10[,1]), xlim=c(range(post_bytreat_indA_Moy$q10)[1]*0.9, range(post_bytreat_indA_Moy$q10)[2]*1.1),
-      ylim=c(0,0.22), xlab = expression('q'[10]), col=NA, main="")
+
+plot(density(na.omit(post_bytreat_indA_Moy$q10[,1])), xlim=c(0, 5),
+      ylim=c(0,2), xlab = expression('q'[10]), col=NA, main="")
 for(i in 1:stan_data$Tr){
-  q10_densities_indA_Moy[[i]] <- density(post_bytreat_indA_Moy$q10[,i])
+  q10_densities_indA_Moy[[i]] <- density(rowMeans(post_bytreat_indA_Moy$q10[,stan_data$treatment == i], na.rm=T))
   q10_box_indA_Moy[[i]] <- q10_densities_indA_Moy[[i]]$x
   polygon(q10_densities_indA_Moy[[i]], col=add.alpha(palette_treat[i],0.4), border = add.alpha(palette_treat[i],0.8))
 
@@ -394,8 +418,8 @@ png("./Figures/Amplitude_ratio.png", width = 2000, height=2000, res=300)
 par(mar=c(12,5,2,2))
 bar_positions <-barplot(colMeans(post_bytreat_indA_Moy$amplitude)/averaged_data$avg_resp*100,
                         names.arg = names_treats, las=2, col = palette_treat_simplified, ylab= "mean amplitude (as % of mean respiration)", ylim=c(-40,40))
-add_shading_to_barplot(bar_positions = bar_positions, bar_heights = colMeans(post_bytreat_indA_Moy$amplitude)/averaged_data$avg_resp*100,
-                       density = density_palette, angle = angle_palette)
+# add_shading_to_barplot(bar_positions = bar_positions, bar_heights = colMeans(post_bytreat_indA_Moy$amplitude)/averaged_data$avg_resp*100,
+#                        density = density_palette, angle = angle_palette)
 box()
 dev.off()
 

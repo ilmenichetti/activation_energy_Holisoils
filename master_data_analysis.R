@@ -13,9 +13,8 @@ library(parallel)
 
 set.seed(123)
 
-#TODO Q10
+#TODO Q10 is not correct as range
 
-#TODO plotting enzymatic activities and other variables (boxplots)
 
 
 
@@ -208,8 +207,6 @@ source("./data_analysis_sections/ML_model_benchmarks.R")
 source("./data_analysis_sections/parametric_model_fitting_time_variant.R")
 source("./data_analysis_sections/parametric_model_fitting.R")
 
-source("./data_analysis_sections/Q10_plotting.R")
-
 
 ## Working on the residuals
 
@@ -309,12 +306,6 @@ dev.off()
 
 
 
-
-
-
-
-
-
 ###########################################################################
 #               extrapolation
 ###########################################################################
@@ -361,4 +352,4 @@ dev.off()
 
 
 
-source("./data_analysis_sections/site_local_data.R")
+# source("./data_analysis_sections/site_local_data.R")

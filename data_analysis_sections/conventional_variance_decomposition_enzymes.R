@@ -24,6 +24,7 @@ reordered_interaction <- factor(interaction_levels, levels = c("control.france",
                                                                "clear_cut_slash.spain","clear_cut_no_slash.spain"
 ))
 
+
 enzyme_means_table = mat.or.vec( length(unique(interaction(soil_data$treatment, soil_data$site))), length(plot_names))
 colnames(enzyme_means_table) = plot_names
 rownames(enzyme_means_table) = levels(reordered_interaction)
@@ -40,6 +41,7 @@ for (i in 1:length(plot_names)) {
           las = 2,
           main = paste(name))
 
+
   # Perform ANOVA
   anova_model <- aov(soil_data[[name]] ~ reordered_interaction)
 
@@ -49,10 +51,15 @@ for (i in 1:length(plot_names)) {
                            FUN = mean)
   colnames(means_table) <- c("Group", "Mean")
 
+  means_table$Group <- factor(means_table$Group, levels = levels(reordered_interaction))
+  means_table <- means_table[order(means_table$Group), ]
+
   # Apply quantile-based CI calculation for each group
   ci_table <- aggregate(soil_data[[name]],
                         by = list(interaction(soil_data$treatment, soil_data$site)),
                         FUN = calc_ci)
+  ci_table$Group <- factor(ci_table$Group, levels = levels(reordered_interaction))
+  ci_table <- ci_table[order(ci_table$Group), ]
 
   # Extract lower and upper CIs using apply
   lower_cis <- apply(ci_table$x, 1, function(row) row[1])  # Extract lower bound (2.5%)
@@ -62,7 +69,7 @@ for (i in 1:length(plot_names)) {
                          Upper = upper_cis)
 
   # Perform ANOVA again (to match grouping)
-  anova_model <- aov(soil_data[[name]] ~ reordered_interaction)
+  # anova_model <- aov(soil_data[[name]] ~ reordered_interaction)
 
   # Extract letter groupings using multcompLetters from the ANOVA model
   group_letters <- multcompLetters(TukeyHSD(anova_model)$reordered_interaction[, "p adj"])$Letters
@@ -105,6 +112,10 @@ plot_names_edaphic = c( "No_trees_ha","Basal_area", "Mean_DBH", "bulk_den",
 edaphic_means_table = mat.or.vec( length(unique(interaction(soil_data$treatment, soil_data$site))), length(plot_names_edaphic))
 colnames(edaphic_means_table) = plot_names_edaphic
 rownames(edaphic_means_table) = levels(reordered_interaction)
+
+
+str(edaphic_means_table)
+edaphic_means_table[,9]
 
 png("./Figures/edaphic_boxplots.png", height=3000, width = 4000, res = 300)
 par(mar=c(14,5,1,1), mfrow=c(3,3))

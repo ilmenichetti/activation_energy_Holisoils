@@ -71,7 +71,12 @@ generated quantities {
   vector[N] xi_temp;
   vector[N] sine_wave;
   vector[N] res;
-  vector[Tr] q10;
+
+  vector[N] xi_temp_low;
+  vector[N] xi_temp_high;
+  vector[N] model_resp_low;
+  vector[N] model_resp_high;
+  vector[N] q10;
 
   // Model prediction
   for (i in 1:N) {
@@ -81,12 +86,21 @@ generated quantities {
     model_resp[i] = sine_wave[i] +  (xi_temp[i] * xi_moist[i]);
     // model_resp[i] =   (xi_temp[i] * xi_moist[i]);
     res[i] = model_resp[i] - resp[i];
+
+
+    // Calculate Q10 for each observation
+    // Using Q10_range[1] and Q10_range[2] for a range-based Q10 calculation
+    xi_temp_low[i] = A[plot_id[i]]*(exp(-Ea[treatment[i]] / ((Q10_range[1] + 273.15) - T_0)));
+    xi_temp_high[i] = A[plot_id[i]]*(exp(-Ea[treatment[i]] / ((Q10_range[2] + 273.15) - T_0)));
+    model_resp_low[i] =  (xi_temp_low[i] * xi_moist[i]);
+    model_resp_high[i] =  (xi_temp_high[i] * xi_moist[i]);
+
+    q10[i] = exp(log(model_resp_high[i] / model_resp_low[i]) * (10 / (Q10_range[2] - Q10_range[1])));
+
+
+
   }
 
-  //q10 calculation
-  for (q in 1:Tr){
-  q10[q] = exp((Ea[q] / ((Q10_range[1] + 273.15) - T_0)) - (Ea[q] / ((Q10_range[2] + 273.15) - T_0)));
-  }
 
 
 }

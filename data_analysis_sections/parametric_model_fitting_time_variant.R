@@ -256,3 +256,4 @@ dev.off()
 
 #to leave memory for following tasks
 # rm(fit_bytreat_indA_Moy_sin_timevar)
+# rm(post_bytreat_indA_Moy_timevar)
