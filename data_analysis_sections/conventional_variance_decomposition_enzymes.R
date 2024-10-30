@@ -68,17 +68,19 @@ for (i in 1:length(plot_names)) {
                          Lower = lower_cis,
                          Upper = upper_cis)
 
-  # Perform ANOVA again (to match grouping)
-  # anova_model <- aov(soil_data[[name]] ~ reordered_interaction)
-
   # Extract letter groupings using multcompLetters from the ANOVA model
   group_letters <- multcompLetters(TukeyHSD(anova_model)$reordered_interaction[, "p adj"])$Letters
+  group_letters <- data.frame(Group = names(group_letters), group_letters)
 
   # Merge means and CI into one table
-  combined_table <- merge(means_table, ci_table, by = "Group")
+  combined_table <- merge(means_table, ci_table,  by = "Group")
+  combined_table <- merge(combined_table, group_letters,  by = "Group")
 
   # Add the groupings to the combined table
-  combined_table$Grouping <- group_letters
+  colnames(combined_table)[5] ="grouping"
+
+  combined_table$Group <- factor(combined_table$Group, levels = levels(reordered_interaction))
+  combined_table <- combined_table[order(combined_table$Group), ]
 
   # Create a final column combining Mean (Lower, Upper) ^Grouping
   combined_table$Result <- paste0(
@@ -136,6 +138,8 @@ for (i in 1:length(plot_names_edaphic)) {
                            by = list(interaction(soil_data$treatment, soil_data$site)),
                            FUN = mean)
   colnames(means_table) <- c("Group", "Mean")
+  means_table$Group <- factor(means_table$Group, levels = levels(reordered_interaction))
+  means_table <- means_table[order(means_table$Group), ]
 
   # Apply quantile-based CI calculation for each group
   ci_table <- aggregate(soil_data[[name]],
@@ -151,18 +155,23 @@ for (i in 1:length(plot_names_edaphic)) {
                          Lower = lower_cis,
                          Upper = upper_cis)
 
-  # Perform ANOVA again (to match grouping)
-  anova_model <- aov(soil_data[[name]] ~ reordered_interaction)
+  ci_table$Group <- factor(ci_table$Group, levels = levels(reordered_interaction))
+  ci_table <- ci_table[order(ci_table$Group), ]
+
 
   # Extract letter groupings using multcompLetters from the ANOVA model
-  group_letters_full <- rep(NA, length(levels(reordered_interaction)))
-  names(group_letters_full) <- levels(reordered_interaction)
-  group_letters_full[names(group_letters)] <- group_letters
-  combined_table$Grouping <- group_letters_full[combined_table$Group]
+  group_letters <- multcompLetters(TukeyHSD(anova_model)$reordered_interaction[, "p adj"])$Letters
+  group_letters <- data.frame(Group = names(group_letters), group_letters)
 
-    # Merge means and CI into one table
-  combined_table <- merge(means_table, ci_table, by = "Group")
+  # Merge means and CI into one table
+  combined_table <- merge(means_table, ci_table,  by = "Group")
+  combined_table <- merge(combined_table, group_letters,  by = "Group")
 
+  # Add the groupings to the combined table
+  colnames(combined_table)[5] ="grouping"
+
+  combined_table$Group <- factor(combined_table$Group, levels = levels(reordered_interaction))
+  combined_table <- combined_table[order(combined_table$Group), ]
 
   # Create a final column combining Mean (Lower, Upper) ^Grouping
   combined_table$Result <- paste0(
