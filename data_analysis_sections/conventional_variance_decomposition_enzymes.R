@@ -77,7 +77,7 @@ for (i in 1:length(plot_names)) {
   combined_table <- merge(combined_table, group_letters,  by = "Group")
 
   # Add the groupings to the combined table
-  colnames(combined_table)[5] ="grouping"
+  colnames(combined_table)[5] ="Grouping"
 
   combined_table$Group <- factor(combined_table$Group, levels = levels(reordered_interaction))
   combined_table <- combined_table[order(combined_table$Group), ]
@@ -136,7 +136,7 @@ for (i in 1:length(plot_names_edaphic)) {
   # Get the means and confidence intervals for each group
   means_table <- aggregate(soil_data[[name]],
                            by = list(interaction(soil_data$treatment, soil_data$site)),
-                           FUN = mean)
+                           FUN = function(x) mean(x, na.rm = TRUE))
   colnames(means_table) <- c("Group", "Mean")
   means_table$Group <- factor(means_table$Group, levels = levels(reordered_interaction))
   means_table <- means_table[order(means_table$Group), ]
@@ -165,10 +165,10 @@ for (i in 1:length(plot_names_edaphic)) {
 
   # Merge means and CI into one table
   combined_table <- merge(means_table, ci_table,  by = "Group")
-  combined_table <- merge(combined_table, group_letters,  by = "Group")
+  combined_table <- merge(combined_table, group_letters,  by = "Group", all.x = TRUE)
 
   # Add the groupings to the combined table
-  colnames(combined_table)[5] ="grouping"
+  colnames(combined_table)[5] ="Grouping"
 
   combined_table$Group <- factor(combined_table$Group, levels = levels(reordered_interaction))
   combined_table <- combined_table[order(combined_table$Group), ]
