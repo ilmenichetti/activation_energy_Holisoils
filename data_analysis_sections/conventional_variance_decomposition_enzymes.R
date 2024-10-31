@@ -107,7 +107,7 @@ calc_ci <- function(x) {
 }
 
 
-plot_names_edaphic = c( "No_trees_ha","Basal_area", "Mean_DBH", "bulk_den",
+plot_names_edaphic = c("No_trees_ha","Basal_area", "Mean_DBH", "bulk_den",
                        "pH","phosphorous","Ntot","Ctot","C_stocks")
 
 
