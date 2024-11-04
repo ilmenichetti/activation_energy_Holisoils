@@ -230,6 +230,7 @@ $$
 
 
 ## Parametric model posteriors, constant `E_a` 
+The activation energy (Ea) and temperature sensitivity (Q10) values of SOM mineralization were consistently higher in Romania, followed by France and Spain. In general, the activation energy and Q10 values decreased with slash addition due to higher SOM quality compared with treatments in which slash was removed. This was especially evident in Spain for both thinning and clear-cut and in the clear treatment in France. The activation energy and Q10 in the treatments where slash was added did not differ from controls (Figure x, xa). These results were consistent when the activation energy was analysed as a function of time since disturbance and the activation energy systematically decreased in all treatments and all countries with time since disturbance (Figure x). The photosynthetic activity did not modify the sensitivity of soil respiration to temperature (peak and amplitude factors from the sine-function not affected) (Figure xb, c). However, the amplitude of the sine-function tended to be higher in France (Figure xc). The parameters of soil moisture function (a and b) did not change the response of the model either (Figure xd, e).
 
 ![Posteriors of the parameters varying as a function of treatments, `E_a` constant over time](../Figures/posteriors_boxplots.png){width=60%}
 
