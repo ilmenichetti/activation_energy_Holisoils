@@ -213,13 +213,24 @@ $$
 
 # Results
 
-## Sites microclimate
-![Climatic parameters (soil temperature and soil moisture) and respiration measured at the study sites (mean values per month and treatment after loess interpolation with span = 0.5). Please notice thot not every time series covers the same period of time. Red shades = France, green shades = Romania, blue shades = Spain](../Figures/climatedata_means.png){width=60%}
+## Characterization of study sites
+Tree density in France was very high compared to Spain and especially to Romania where the tree density was very low (Figure x). In contrast, the DBH was the lowest in France and the highest in Romania (Figure x). Spain showed intermediate values of both tree density and DBH (Figure x). For soil variables, in the untouched forest (control), the bulk density was the highest in Spain and the lowest in France. Spain had the highest pH while France and Romania had similar ranges of pH. The highest significant levels of C and N were found in Spain while the lowest C content was found in Romania. France in turn presented doubled C:N rates than the other two sites (Figure x). Total microbial biomass, fungal biomass and bacterial biomass peaked in France, followed by Spain and it was the lowest in Romania. Similarly, in general, activities of most enzymes were higher in France compared with Spain and Romania (Figure x).  
 
-## Edaphic and biological variables
+
+##Effects of management disturbance treatments on soil physical-chemical and biological properties
+The disturbance treatments barely affected the soil properties in Romania (Figure x). In France, the bulk density increased as the intensity of the disturbance did (i.e., from thinning with slash to clear-cut no slash) and in Spain it significantly increased in all the disturbance treatments compared with control (Figure x). The pH only significantly increased in both clear-cut treatments in Spain. Moreover, in Spain the N content decreased in the thinning and clear-cut without slash (Figure x). In France, compared with controls, C content increased in all the disturbance treatment, but in the clear-cut without slash that decreased (Figure x). In Spain, C content only decreased in the thinning-without slash treatment (Figure x). 
+Similar to soil properties, microbial biomass, fungal biomass and bacterial biomass did not change with the disturbance treatment in Romania. In Spain, these variables significantly decreased in the disturbance treatments where the slash was removed and in France only in the clear-cut treatment where the slash was removed (Figure x). The disturbance treatments barely affected enzymatic activities in Romania and Spain, but generally decreased in clear-cut where slash was removed in France (Figure x).
+
 ![Boxplots of soil microbial biomass and enzymatic activities per disturbance treatment and study site. Red shades = France, green shades = Romania, blue shades = Spain](../Figures/enzymes_boxplots.png){width=80%}
 ![Boxplots of stand characteristics and soil physical-chemical properties per disturbance treatment and study site. Red shades = France, green shades = Romania, blue shades = Spain](../Figures/edaphic_boxplots.png){width=80%}
 
+## Effects of management disturbance treatments on soil microclimate and respiration
+
+![Climatic parameters (soil temperature and soil moisture) and respiration measured at the study sites (mean values per month and treatment after loess interpolation with span = 0.5). Please notice thot not every time series covers the same period of time. Red shades = France, green shades = Romania, blue shades = Spain](../Figures/climatedata_means.png){width=60%}
+
+As expected, in Spain the temperature variation was the lowest compared to the other two sites. In general, control plots showed the lowest thermal amplitude in all sites (i.e., with higher temperatures in winter and lower in summer). In Spain, the soil temperature increased as the intensity of the tree removal, mainly in summer, but the addition of slash buffered these increases. In France, the main effect on soil temperature was the tree removal, especially in summer and this was independent on the addition of slash. Soil temperature was not affected by disturbance and post-disturbance treatments in Romania. The observed effects of the disturbance and post-disturbance treatments on soil temperature were decreasing with time.
+Soil moisture fluctuated inversely with temperature. In Spain, soil moisture was higher in the clear-cut with and without slash addition, except in the driest periods (from April to August). Similarly, in Romania, clear-cut increased soil moisture independently of slash addition. Contrarily, in France, soil moisture tended to decrease in the clear-cut treatment with and without slash (Figure x). 
+Both in Spain and France, removal of slash decreased respiration rates, independently of tree cutting intensity, and thinning coupled with slash addition kept the respiration rates as the same level as controls. In Romania, effects of the disturbances were lower, however clear-cut increased respiration rates, especially when slash was added to the soil. At the end of the monitoring period, three years for Spain and two years for France and Romania after disturbance, respiration rates increased in the clear-cut with slash addition in the three study sites (Figure x).
 
 
 ## Benchmark models and parametric model fit
