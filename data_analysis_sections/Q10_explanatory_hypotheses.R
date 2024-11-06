@@ -92,10 +92,25 @@ summary(mixed_model)
 
 summary(lm(predict(mixed_model) ~ reduced_dataset_mixed$Q10_averages))
 
+# Calculate relative importance for fixed effects
+library(MuMIn)
+
+mixed_model_ml <- lmer(Q10_averages ~ No_trees_ha + fungi_bact_rate + C_stocks + T1_soil + Soil_moist + (1 | treatment_vector),
+                       data = reduced_dataset_mixed, REML = FALSE, na.action = na.fail)
+
+dredge_results <- dredge(mixed_model_ml)
+rel_importance <- model.avg(get.models(dredge_results, subset = TRUE))
+str(sw(rel_importance))
+
+png("./Figures/mixed_model_relimp.png", height=1400, width = 1400, res=300)
+par(mar = c(9, 4, 2, 1))  # Adjust 'mar' to control the space around each plot
+barplot(as.numeric(sw(rel_importance)), names.arg = names(sw(rel_importance)),  col = "steelblue", ylab = "Relative importance", las=2)
+dev.off()
 
 
+##########
 
-############### PLS analysis
+##### PLS analysis
 library(pls)
 pls_model <- plsr(Q10_averages ~ ., data = as.data.frame(data_scaled), ncomp = 5)
 summary(pls_model)
