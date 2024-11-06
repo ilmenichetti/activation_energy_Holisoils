@@ -114,6 +114,6 @@ legend("bottomright", paste("Explained variance (2 comps) = ", round(explained_v
 
 par(mar = c(12, 4, 2, 1))  # Adjust 'mar' to control the space around each plot
 abs_coef <- abs(coef(pls_model))
-barplot(as.vector(abs_coef), main = "", las = 2, col = "steelblue", ylab = "Regression coefficient", names.arg = rownames((abs_coef)))
+barplot(abs_coef[order(abs_coef)], main = "", las = 2, col = "steelblue", ylab = "Regression coefficient", names.arg = rownames(abs_coef)[order(abs_coef)])
 dev.off()
 
