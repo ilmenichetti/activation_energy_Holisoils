@@ -40,12 +40,15 @@ treatment_vector <- soil_data %>%
   pull(treatment)
 
 
+treatment_vector = treatment_vector[ rownames(aggregated_soil_data) != "19.romania"]
+site_vector = site_vector[ rownames(aggregated_soil_data) != "19.romania"]
+
 # correlation matrix
 names(aggregated_soil_data)
 
 
 selected_columns <- c(
-  "year", "No_trees", "No_trees_ha", "Basal_area", "bulk_den", #"Mean_DBH",  removed becuase many NAs in ROmania
+ "No_trees_ha", "Basal_area", "bulk_den", #"Mean_DBH",  removed becuase many NAs in ROmania "year",
   "pH",  "Ntot", "Ctot", #"phosphorous", removed becuase many NAs in Romania
   "C_stocks", "fungi_biomass", "bacteria_biomass", "actinobacteria_biomass",
   "gram_pos_biomass", "gram_neg_biomass", "total_biomass", "fungi_bact_rate",
@@ -57,12 +60,12 @@ selected_columns <- c(
 
 ### removing 19.romania because it misses soil temp and moist!
 reduced_dataset = aggregated_soil_data[ rownames(aggregated_soil_data) != "19.romania", selected_columns]
-reduced_dataset_sites = aggregated_soil_data[ rownames(aggregated_soil_data) != "19.romania", "aggregation_level"]
+reduced_dataset_sites = aggregated_soil_data[rownames(aggregated_soil_data) != "19.romania", "aggregation_level"]
 negative_coords <- which( reduced_dataset< 0, arr.ind = TRUE)
 reduced_dataset[negative_coords] = 0 # there are some negs in the enzymes
+aggregated_soil_data$year
 
-
-data_scaled <- scale(aggregated_soil_data[ rownames(aggregated_soil_data) != "19.romania", selected_columns])
+data_scaled <- scale(reduced_dataset)
 
 # Calculate correlation on columns with non-zero standard deviation
 correlation_matrix <- cor(data_scaled, use = "pairwise.complete.obs")
@@ -80,6 +83,14 @@ heatmap(correlation_matrix,
         main = "")
 dev.off()
 
+
+############### mixed model analysis
+library(lme4)
+reduced_dataset_mixed = cbind(as.data.frame(data_scaled), treatment_vector)
+mixed_model <- lmer(Q10_averages ~ No_trees_ha + fungi_bact_rate + C_stocks + T1_soil + Soil_moist + treatment_vector + (1 | site_vector), data = reduced_dataset_mixed)
+summary(mixed_model)
+
+summary(lm(predict(mixed_model) ~ reduced_dataset_mixed$Q10_averages))
 
 
 
