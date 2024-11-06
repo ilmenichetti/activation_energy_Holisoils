@@ -60,7 +60,9 @@ palette_plot <-  c(paletteer::paletteer_c("ggthemes::Orange-Gold", n=length(uniq
 palette_treat <- c("#F4D166FF", "#F6A143FF", "#EE711DFF", "#CD4E22FF", "#9E3A26FF",
                    "#B3E0A6FF", "#7FC572FF", "#5DA554FF", "#378748FF", "#24693DFF",
                    "#BCE4D8FF", "#81C3CBFF", "#46A1B8FF", "#347C9FFF", "#2C5985FF")
-
+palette_site  <- c("#F6A143FF",
+                   "#7FC572FF",
+                   "#46A1B8FF")
 # palette_plot
 palette_plot <- c("#F4D166FF", "#F5CC63FF", "#F6C760FF", "#F7C25CFF", "#F8BD58FF",
                   "#F8B855FF", "#F8B352FF", "#F8AE4FFF", "#F7A94BFF", "#F7A447FF",

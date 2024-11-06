@@ -28,6 +28,16 @@ aggregated_soil_data <- soil_data %>%
 
 aggregated_soil_data = cbind(aggregated_soil_data, Q10_averages)
 
+# Step 2: Extract categorical variables as separate vectors
+site_vector <- soil_data %>%
+  group_by(aggregation_level) %>%
+  summarise(site = first(site)) %>%
+  pull(site)
+
+treatment_vector <- soil_data %>%
+  group_by(aggregation_level) %>%
+  summarise(treatment = first(treatment)) %>%
+  pull(treatment)
 
 
 # correlation matrix
@@ -35,8 +45,8 @@ names(aggregated_soil_data)
 
 
 selected_columns <- c(
-  "year", "No_trees", "No_trees_ha", "Basal_area", "Mean_DBH","bulk_den",
-  "pH", "phosphorous", "Ntot", "Ctot",
+  "year", "No_trees", "No_trees_ha", "Basal_area", "bulk_den", #"Mean_DBH",  removed becuase many NAs in ROmania
+  "pH",  "Ntot", "Ctot", #"phosphorous", removed becuase many NAs in Romania
   "C_stocks", "fungi_biomass", "bacteria_biomass", "actinobacteria_biomass",
   "gram_pos_biomass", "gram_neg_biomass", "total_biomass", "fungi_bact_rate",
   "beta_gluco", "acid_phos", "beta_xylo", "chitise",
@@ -45,13 +55,17 @@ selected_columns <- c(
   "T1_soil", "Soil_moist",
   "Q10_averages")
 
-# Filter out columns that have all NA values or only one unique value
-non_zero_sd_columns <- aggregated_soil_data[, selected_columns][, sapply(aggregated_soil_data[, selected_columns], function(x) {
-  sd(x, na.rm = TRUE) > 0 && length(unique(na.omit(x))) > 1
-})]
+### removing 19.romania because it misses soil temp and moist!
+reduced_dataset = aggregated_soil_data[ rownames(aggregated_soil_data) != "19.romania", selected_columns]
+reduced_dataset_sites = aggregated_soil_data[ rownames(aggregated_soil_data) != "19.romania", "aggregation_level"]
+negative_coords <- which( reduced_dataset< 0, arr.ind = TRUE)
+reduced_dataset[negative_coords] = 0 # there are some negs in the enzymes
+
+
+data_scaled <- scale(aggregated_soil_data[ rownames(aggregated_soil_data) != "19.romania", selected_columns])
 
 # Calculate correlation on columns with non-zero standard deviation
-correlation_matrix <- cor(aggregated_soil_data[, selected_columns], use = "pairwise.complete.obs")
+correlation_matrix <- cor(data_scaled, use = "pairwise.complete.obs")
 write.csv(correlation_matrix, "./Checks/Correlation_mat_Q10.csv")
 
 
@@ -65,3 +79,41 @@ heatmap(correlation_matrix,
         margins = c(6.5,6.5),
         main = "")
 dev.off()
+
+
+
+
+
+############### PLS analysis
+library(pls)
+pls_model <- plsr(Q10_averages ~ ., data = as.data.frame(data_scaled), ncomp = 5)
+summary(pls_model)
+plot(pls_model, "validation", val.type = "R2")
+pls_scores <- scores(pls_model)
+
+explained_variance_response <- R2(pls_model, estimate = "train")
+
+# Extract scores and loadings for the first two components
+scores <- scores(pls_model)[, 1:2]
+loadings <- loadings(pls_model)[, 1:2]
+
+png("./Figures/Q10_PLS_biplot.png", height=2500, width = 1800, res=300)
+
+layout(matrix(c(1, 1, 1, 2,2), nrow = 5, ncol = 1, byrow = TRUE))
+par(mar = c(4, 4, 2, 1))  # Adjust 'mar' to control the space around each plot
+
+# Define the biplot
+plot(scores, xlab = "Component 1", ylab = "Component 2", main = "PLS Q10 ~ . ",  col = palette_site[as.factor(site_vector)], pch=as.numeric(as.factor(treatment_vector)))
+# Add loadings as arrows
+scaling=17
+arrows(0, 0, loadings[, 1]*scaling, loadings[, 2]*scaling, col = "darkgrey", length = 0.1)
+text(loadings[, 1]*scaling, loadings[, 2]*scaling, labels = rownames(loadings), col = "black", pos = 3, cex=0.8)
+legend("topleft", levels(as.factor(treatment_vector)), pch=1:5, bty="n")
+legend("topright", levels(as.factor(site_vector)), pch=1, bty="n", col=palette_site)
+legend("bottomright", paste("Explained variance (2 comps) = ", round(explained_variance_response$val[2],2)), pch=NA, bty="n")
+
+par(mar = c(12, 4, 2, 1))  # Adjust 'mar' to control the space around each plot
+abs_coef <- abs(coef(pls_model))
+barplot(as.vector(abs_coef), main = "", las = 2, col = "steelblue", ylab = "Regression coefficient", names.arg = rownames((abs_coef)))
+dev.off()
+
