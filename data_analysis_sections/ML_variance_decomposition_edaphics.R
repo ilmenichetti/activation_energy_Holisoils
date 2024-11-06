@@ -22,6 +22,11 @@ rf_soil_data_train$treatment <- as.factor(rf_soil_data_train$treatment)
 rf_soil_data_valid$treatment <- as.factor(rf_soil_data_valid$treatment)
 
 
+rf_soil_data_train_T1 <- na.omit(soil_data_train[soil_data_train$time == "T1",predictor_list])
+rf_soil_data_valid_T1 <- na.omit(soil_data_valid[soil_data_valid$time == "T1",predictor_list])
+
+
+
 dim(rf_soil_data_train)
 dim(rf_soil_data_valid)
 
@@ -54,6 +59,17 @@ tuned_rf <- train(
 rf_model_CO2_flux <- randomForest(CO2_flux_norm ~ . , data = rf_soil_data_train,
                                   mtry = tuned_rf$bestTune$mtry)
 
+
+rf_model_CO2_flux_T1 <- randomForest(CO2_flux_norm ~ . , data = rf_soil_data_train_T1,
+                                  mtry = tuned_rf$bestTune$mtry)
+varImpPlot(rf_model_CO2_flux_T1)
+
+plot(predict(rf_model_CO2_flux_T1, newdata = rf_soil_data_valid_T1), rf_soil_data_valid_T1$CO2_flux_norm)
+plot(predict(rf_model_CO2_flux_T1), rf_soil_data_train_T1$CO2_flux_norm)
+summary(lm(predict(rf_model_CO2_flux_T1) ~ rf_soil_data_train_T1$CO2_flux_norm))
+
+
+
 range_plot = range(c(predict(rf_model_CO2_flux, newdata = rf_soil_data_valid),
                      rf_soil_data_valid$CO2_flux_norm))
 
@@ -74,4 +90,6 @@ par(mar=c(3,10,2,2))
 barplot(varimp_model_CO2_flux[order(varimp_model_CO2_flux$Overall),], las=2,
         names.arg = rownames(varimp_model_CO2_flux)[order(varimp_model_CO2_flux$Overall)], horiz = T)
 dev.off()
+
+
 

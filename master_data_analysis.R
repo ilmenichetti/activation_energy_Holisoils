@@ -13,7 +13,6 @@ library(parallel)
 
 set.seed(123)
 
-#TODO Q10 is not correct as range
 
 
 

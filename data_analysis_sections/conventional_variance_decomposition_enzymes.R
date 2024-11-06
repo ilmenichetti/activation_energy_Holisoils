@@ -189,3 +189,17 @@ dev.off()
 
 write.csv(edaphic_means_table, "./Tables/Edaphics_means.csv")
 
+
+
+
+
+
+
+
+
+
+##### mixed models decomposition
+
+names(soil_data)
+
+
