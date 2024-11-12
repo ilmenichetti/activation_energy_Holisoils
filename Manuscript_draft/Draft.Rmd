@@ -250,11 +250,19 @@ The activation energy (Ea) and temperature sensitivity (Q10) values of SOM miner
 ![Posteriors of the `E_a` parameter varying as a function of treatments and sampling year](../Figures/timeseries_Ea_timevariant.png){width=60%}
 
 
-## Machine learning variance decomposition: predicting respiration based on edaphic, ecological and enzymatic data
+## Variance decomposition: predicting respiration based on edaphic, ecological and enzymatic data
 
 ![Fit of the detailed random forest model (a) and variable importance of the same model (b) for edaphics and ecological variables Only the 20 variables explaining most variance are shown here.](../Figures/variance_decomposition_edaphics.png){width=50%}
 
 ![Fit of the detailed random forest model (a) and variable importance of the same model (b) for enzymatic activities. Only the 20 variables explaining most variance are shown here.](../Figures/variance_decomposition_enzyme.png){width=50%}
+
+
+## Variance decomposition: predicting Q10 based on edaphic, ecological and enzymatic data
+
+![.](../Figures/mixed_model_relimp.png){width=50%}
+
+
+![.](../Figures/Q10_PLS_biplot.png){width=50%}
 
 
 
@@ -291,7 +299,7 @@ Any other variable than soil temperature and moisture did not seem to play a piv
 
 
 # Appendix
-![Posteriors of the scaling parameter, varying as a function of single plots](../Figures/posteriors_boxplots_q10.png){width=60%}
+![.](../Figures/posteriors_boxplots_q10.png){width=60%}
 
 ![Posteriors of the scaling parameter, varying as a function of single plots](../Figures/Appendix/posteriors_boxplots_A.png){width=60%}
 

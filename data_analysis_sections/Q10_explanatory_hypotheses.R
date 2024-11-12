@@ -54,7 +54,7 @@ selected_columns <- c(
   "gram_pos_biomass", "gram_neg_biomass", "total_biomass", "fungi_bact_rate",
   "beta_gluco", "acid_phos", "beta_xylo", "chitise",
   "cellobiohydrolase", "beta_galacto", "alpha_gluco", "lipase",
-  "CO2_flux_hour", #"CO2_flux_norm",
+  "CO2_flux_norm",   #"CO2_flux_hour",
   "T1_soil", "Soil_moist",
   "Q10_averages")
 
@@ -83,14 +83,18 @@ heatmap(correlation_matrix,
         main = "")
 dev.off()
 
+# ---------------------------------------------
+#              Mixed models
+# ---------------------------------------------
 
-############### mixed model analysis
+############### mixed model with C
+
 library(lme4)
 reduced_dataset_mixed = cbind(as.data.frame(data_scaled), treatment_vector)
 mixed_model <- lmer(Q10_averages ~ No_trees_ha + fungi_bact_rate + C_stocks + T1_soil + Soil_moist + treatment_vector + (1 | site_vector), data = reduced_dataset_mixed)
 summary(mixed_model)
 
-summary(lm(predict(mixed_model) ~ reduced_dataset_mixed$Q10_averages))
+mixed_model_lm <- summary(lm(predict(mixed_model) ~ reduced_dataset_mixed$Q10_averages))
 
 # Calculate relative importance for fixed effects
 library(MuMIn)
@@ -105,7 +109,31 @@ str(sw(rel_importance))
 png("./Figures/mixed_model_relimp.png", height=1400, width = 1400, res=300)
 par(mar = c(9, 4, 2, 1))  # Adjust 'mar' to control the space around each plot
 barplot(as.numeric(sw(rel_importance)), names.arg = names(sw(rel_importance)),  col = "steelblue", ylab = "Relative importance", las=2)
+legend("topright", legend = list(bquote(R^2 == .(round(mixed_model_lm$r.squared, 2)))), bty="n")
 dev.off()
+
+
+
+############### mixed model with N
+
+mixed_model_N <- lmer(Q10_averages ~ No_trees_ha + fungi_bact_rate + Ntot + T1_soil + Soil_moist + treatment_vector + (1 | site_vector), data = reduced_dataset_mixed)
+summary(mixed_model_N)
+
+mixed_model_N_lm <-  summary(lm(predict(mixed_model_N) ~ reduced_dataset_mixed$Q10_averages))
+
+# Calculate relative importance for fixed effects
+mixed_model_ml_N <- lmer(Q10_averages ~ No_trees_ha + fungi_bact_rate + Ntot + T1_soil + Soil_moist + (1 | treatment_vector),
+                       data = reduced_dataset_mixed, REML = FALSE, na.action = na.fail)
+
+dredge_results_N <- dredge(mixed_model_ml_N)
+rel_importance_N <- model.avg(get.models(dredge_results_N, subset = TRUE))
+
+png("./Figures/mixed_model_relimp_N.png", height=1400, width = 1400, res=300)
+par(mar = c(9, 4, 2, 1))  # Adjust 'mar' to control the space around each plot
+barplot(as.numeric(sw(rel_importance_N)), names.arg = names(sw(rel_importance_N)),  col = "steelblue", ylab = "Relative importance", las=2)
+legend("topright", legend = list(bquote(R^2 == .(round(mixed_model_N_lm$r.squared, 2)))), bty="n")
+dev.off()
+
 
 
 
@@ -141,7 +169,8 @@ legend("topright", levels(as.factor(site_vector)), pch=1, bty="n", col=palette_s
 legend("bottomright", paste("Explained variance (2 comps) = ", round(explained_variance_response$val[2],2)), pch=NA, bty="n")
 
 par(mar = c(12, 4, 2, 1))  # Adjust 'mar' to control the space around each plot
-abs_coef <- abs(coef(pls_model))
+abs_coef <- (coef(pls_model))
 barplot(abs_coef[order(abs_coef)], main = "", las = 2, col = "steelblue", ylab = "Regression coefficient", names.arg = rownames(abs_coef)[order(abs_coef)])
+abline(h=0)
 dev.off()
 
