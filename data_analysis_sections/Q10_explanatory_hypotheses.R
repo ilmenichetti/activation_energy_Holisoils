@@ -108,6 +108,8 @@ barplot(as.numeric(sw(rel_importance)), names.arg = names(sw(rel_importance)),  
 dev.off()
 
 
+
+
 ##########
 
 ##### PLS analysis
