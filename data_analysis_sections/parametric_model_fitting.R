@@ -1,4 +1,4 @@
-
+gc()
 
 library(parallel)
 
