@@ -210,6 +210,15 @@ source("./data_analysis_sections/parametric_model_fitting_time_variant.R")
 source("./data_analysis_sections/parametric_model_fitting.R")
 
 
+
+# ************************************************************
+# ************** Testing Q10 explanatories ******************
+# ************************************************************
+source("./data_analysis_sections/Q10_explanatory_hypotheses.R")
+
+
+
+
 ## Working on the residuals
 
 residuals_indA_moy <- predicted_means_indA_Moy - processed_data_filtered$CO2_flux_hour
