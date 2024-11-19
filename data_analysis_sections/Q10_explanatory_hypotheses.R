@@ -49,7 +49,7 @@ names(aggregated_soil_data)
 
 selected_columns <- c(
  "No_trees_ha", "Basal_area", "bulk_den", #"Mean_DBH",  removed becuase many NAs in ROmania "year",
-  "pH",  "Ntot", "Ctot", #"phosphorous", removed becuase many NAs in Romania
+  "pH",  "Ntot", "Ctot", "phosphorous", #removed becuase many NAs in Romania
   "C_stocks", "fungi_biomass", "bacteria_biomass", "actinobacteria_biomass",
   "gram_pos_biomass", "gram_neg_biomass", "total_biomass", "fungi_bact_rate",
   "beta_gluco", "acid_phos", "beta_xylo", "chitise",
