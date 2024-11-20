@@ -59,12 +59,19 @@ The activity of extracellular enzymes involved in SOM decomposition was measured
 The same five soil cores used for chemical analyses were used to estimate soil microbial biomass. To do that, we extracted Phospholipid fatty acids (PLFAs) following Šnajdr et al. (2008). Lipids were extracted using approximately 1g of dry soil with a mixture of chloroform:methanol:phosphate buffer (1:2:0.8) and separated by solid-phase extraction cartridges (HyperSep Silica SPE columns 200 mg/3 mL, Thermo Fisher Scientific). PLFAs were eluted using 2 mL of methanol. The selected fractions underwent to mild alkaline methanolysis and the methyl esters of PLFAs were analyzed by gas chromatography-mass spectrometry (GC-MS; 450-GC, 240-MS ion trap detector, Varian, Walnut Creek, CA). In the polar PLFA fraction, fungal biomass was quantified based on 18:2ω6,9 (fungal PLFA) content; bacterial biomass (total bacterial PLFA) was quantified as a sum of i14:0, i15:0, a15:0, 16:1ω5, 16:1ω7, 16:1ω9, 10Me-16:0, i16:0, i17:0, a17:0, cy17:0, 17:0, 10Me-17:0, 18:1ω7, 10Me-18:0, cy19:0 (Actinomycetes 10Me-16:0, 10Me-17:0, 10Me-18:0, Gram-positive i14:0, i15:0, a15:0, i16:0, i17:0, a17:0 and Gram-negative 16:1ω7, 16:1ω9, 18:1ω7, cy17:0, cy19:0). The sum of all of the selected PLFAs together with 16:0 and 18:1w9 was used as an estimate of total microbial biomass (total PLFA). 
 
 
-## Data pretreatment
-
 
 ## Validation
 In order to ensure a robust validation, all models have been validated with a split approach, keeping two completely independent data sets (80% of the points for training and 20% validation). Given the size of the dataset, we considered this approach more reliable than any cross-validation approach.
 
+## Parametric modeling framework
+The parametric models were calibrated in a stratified Bayesian framework, where we assigned independent parameters depending on different groping of the data. All subsequent data analysis (model statistics, parameter distributions) have been done working on the whole posterior MCMC (Markov chain Monte Carlo) for each model.    
+The model was written in Stan [@carpenter2017stan; @standev2018stancore], run from its R interface [@Rstan].
+The likelihood function was defined as:  
+$$
+    Rh_{meas} \sim \mathcal{N}(Rh_{sim}, \sigma)
+$$
+Where the parameter $\sigma$ was defined as the variance of the whole dataset (0.27).
+All models were explaining the measured respiration normalized by SOC stocks in each experimental plot.
 
 ## Parametric model, constant `E_a`
 We defined a parametric model to consider all the three effects on respiration we hypothesized. The first is the influence of temperature, then the influence of soil moisture, and then a seasonal component which is assumed to be roughly proportional to the interactions of autotrophic respiration (which we hypothesized following a seasonal pattern).
@@ -75,14 +82,6 @@ $$
 
 Where the index $j$ corresponds to the treatments and the index $k$ corresponds to the plots (minimal statistical unit), while $(t)$ denotes the variation over time of each forcing variable (temperature, moisture, or days of the year).
 
-## Model calibration
-The parametric model was calibrated in a stratified Bayesian framework, where we assigned independent parameters depending on different groping of the data.   
-The model was written in Stan [@carpenter2017stan; @standev2018stancore], run from its R interface [@Rstan].
-The likelihood function was defined as:  
-$$
-    Rh_{meas} \sim \mathcal{N}(Rh_{sim}, \sigma)
-$$
-Where the parameter $\sigma$ was defined as the variance of the whole dataset (0.27).
 
 ### Moisture 
 The moisture scaling function was taken from a simplified version of Moyano (2013) in the SoilR package [@SierraMueller].
@@ -92,7 +91,6 @@ $$
 We assumed that the variability in moisture sensitivity is driven by treatments ($j$). 
 The prior distribution for the term $a$ was assumed as $\sim \mathcal{N}(3.11, 0.1)$ and for the term $b$ was assumed as $\sim \mathcal{N}(2.42, 0.1)$, utilizing as mean values the values in @SierraMueller and setting up conservatives standard deviations.
 
-  
 ### Temperature
 The temperature scaling function we utilized to define the relationship is the one defined by @Lloyd.1994l68 and it is derived from the original Arrhenius equation [Arrhenius.1889]:
 $$
@@ -105,7 +103,7 @@ The prior distribution for the term $A$ was assumed as $\sim \mathcal{N}(300, 10
 
 
 ### Seasonality
-In order to correct for eventual seasonality patters, we introduce also a seasonality scaling.
+In order to detect and correct for eventual seasonality patters, we introduced also a seasonality scaling.
 The seasonality scaling functions assume a sine function with period = 365 days, with both amplitude $ampl_j$ (the magnitude) and peak day $peak_j$ (when the function is at its only annual peak) varying as a function of treatments:
 $$
 \begin{aligned}
@@ -130,7 +128,11 @@ Once we calibrated our parametric model, we could test the consequences of an in
 
 
 ## Parametric model, time-variant `E_a`
-In order to test the hypothesis of an eventual variation of the activation energy of the decomposing material over time without any assumption on the function of variation, we fitted a version of the model where the $E_a$ parameter was stratified in order to let it vary independently for each treatment and year of sampling. 
+In order to test the hypothesis of an eventual variation of the activation energy of the decomposing material over time without any assumption on the function of variation, we fitted a version of the model where the $E_a$ parameter was stratified in order to let it vary independently for each treatment ($j$) and year of sampling ($y$). Each sampling year corresponds to multiple measurements (which is necessary to obtain enough information to constrain the temperature function).
+
+$$
+\xi_{temp(t,j)} = A_{k} \cdot e^{\frac{-Ea_{j,y}}{(T(t)+273.15)-T_0)}}
+$$
 
 
 ```{r, echo=FALSE}
@@ -148,7 +150,7 @@ df <- data.frame(
     "Amplitude of seasonal sine wave", 
     "Peak day of seasonal sine wave"
   ),
-  `Stratification Level, const Eₐ` = c(
+  `Stratification Level, time const Eₐ` = c(
     "Plot", 
     "Treatment", 
     "Treatment", 
@@ -156,7 +158,7 @@ df <- data.frame(
     "Treatment", 
     "Treatment"
   ),
-  `Stratification Level, var Eₐ` = c(
+  `Stratification Level, time var Eₐ` = c(
     "Plot", 
     "Treatment-year", 
     "Treatment", 
@@ -179,7 +181,7 @@ kable(df, format = "pipe", caption = "Model parameters stratification and priors
 ```
 
 ## Machine learning variance decomposition
-On a more limited subset (only Spain), we tested a more extensive random forest model in order to test the predictive power of other variables on the respiration. The model had structure as:  
+We also tested a more extensive random forest model in order to test the predictive power of other variables on the respiration. The model had structure as:  
 $$
 \begin{aligned}
 Rh(t) \sim f(trees,  treatment, DBH, BA, pH, BD, 
@@ -195,9 +197,7 @@ We included in this model tree density in plants ha$^{-1}$ ($trees$), average di
 This model was tested only on a subset of the dataset (only the sites in Spain), for which all the additional variables were available.
 The aim of this model was to test the predictive potential of any of these additional variables, in order to to explore eventual correlations and possible related processes. The choice of a random forest model over a more conventional linear model is motivated by the capacity of the former to consider more complex relationships and interactions, on top of the convenience of being able to assess quantitatively the predictive potential of each variable by estimating relative variable importance.
 
-## Temperature sensitivity (Q10)
-
-## Machine learning variance decomposition on enzymes
+A similar approach was used to assess the predictive power of enzyme activities on respiration:
 $$
 \begin{aligned}
 Rh(t) \sim f(trees, treatment, BA, BD, \\
@@ -208,6 +208,43 @@ Rh(t) \sim f(trees, treatment, BA, BD, \\
 $$
 
 
+## Temperature sensitivity (Q10)
+The Q10 was calculated from the time-invariant process-based model based on each model iteration (so for each element of each MCMC) according to the function:
+$$
+Q_{10} = \left( \frac{R_2}{R_1} \right)^{\frac{10}{T_2 - T_1}}
+$$
+The temperature range was chosen between 15&deg;C. and 25&deg;C, while the relative respiration was selected from the predictions from each model realization. Since produced a vector of estimated Q10 values as long as each MCMC, we could infer from it also the uncertainty estimates for the Q10 values, which are proportional to the uncertainty estimated by each MCMC.
+
+
+## Temperature sensitivity relationships with ecological variables
+We considered the relationships between the Q10 (calculated as above), as an indicator of temperature sensitivity, and other variables in the dataset.  For this we considered the means of the Q10 across each MCMC.  
+We first assessed the interactions with a partial least square (PLS) regression (R package `pls`, @Seasholtz1992):
+
+$$
+Q_{10\_\text{averages}} \sim f(
+\text{No\_trees\_ha}, BA, BD, \text{pH}, pH,\\
+C_{tot}, P,  C_{stocks}, \text{fungi\_biomass}, \text{bacteria\_biomass}, \text{actinobacteria\_biomass}, 
+\text{gram\_pos\_biomass}, \text{gram\_neg\_biomass}, \text{total\_biomass}, \text{fungi\_bact\_rate}, \\
+\text{beta\_gluco}, \text{acid\_phos}, \text{beta\_xylo}, \text{chitise}, \text{cellobiohydrolase}, 
+\text{beta\_galacto}, \text{alpha\_gluco}, \text{lipase}, \text{CO2\_flux\_norm}, \text{T1\_soil}, \text{Soil\_moist})
+$$
+
+The importance of predictor variables in the Partial Least Squares (PLS) model was assessed by examining the values of the regression coefficients derived from the model.  
+
+We then explored more specific relationships with a linear mixed-effects model (R package `lmer`):
+
+$$
+Q_{10\_\text{averages}} = \beta_0 + \beta_1 \cdot \text{No\_trees\_ha} + \beta_2 \cdot \text{fungi\_bact\_rate} + \\
+\beta_3 \cdot C_{stocks} + \beta_4 \cdot T_{soil} + \beta_5 \cdot  M_{soil} + 
+\beta_6 \cdot treatment + site + \epsilon
+$$
+
+Where:
+
+- \( \beta_0 \): Intercept.
+- \( \beta_1, \beta_2, \dots, \beta_6 \): fixed effect coefficients for the predictors.
+- \( u_{\text{site\_vector}} \): random effect for the site (assumes \( u \sim \mathcal{N}(0, \sigma_u^2) \)).
+- \( \epsilon \): Residual error term (assumes \( \epsilon \sim \mathcal{N}(0, \sigma_\epsilon^2) \)).
 
 
 
@@ -234,22 +271,26 @@ Both in Spain and France, removal of slash decreased respiration rates, independ
 ![Figure 3. Climatic parameters (soil temperature and soil moisture) and respiration measured at the study sites (mean values per month and treatment after loess interpolation with span = 0.5). Please notice thot not every time series covers the same period of time. Red shades = France, green shades = Romania, blue shades = Spain](../Figures/climatedata_means.png){width=60%}
 
 ## Benchmark models and parametric model fit
+The two benchmark models were used to set expectations on a possible lower (linear model) and upper (random forest model) bound of the predictive capacity of the data used for the process-based model. As expected, the linear model had a much lower predictive capacity than the random forest model, but both showed that the data contained relevant information to predict soil respiration.
 ![Figure 4. Fit of the two benchmark machine learning models, linear (a) and random forest (b)](../Figures/fit_ML_validation.png){width=80%}
 
+The process-based model (constant $E_a$ over time) had, again as expected, a predictive power in between the two (but closer to the random forest model.)
 
 ![Figure 5. Fit of the parametric model,  constant `E_a`](../Figures/fit_model_validation.png){width=60%}
 
 
 ## Temperature sensitivity (Q10) and parametric model posteriors 
-The temperature sensitivity (Q10) values of SOM mineralization were consistently higher in Romania (2.9 in controls), followed by France (2.7) and Spain (2.5) (Figure S4). The activation energy (Ea) followed the same pattern as Q10 (Figure 6a, Figure S4). In general, the activation energy and Q10 values decreased with slash addition due to higher SOM quality compared with treatments in which slash was removed. This was especially evident in Spain for both thinning and clear-cut and in the clear treatment in France. The activation energy and Q10 in the treatments where slash was added did not differ from controls (Figure 6a, Figure S4). These results were consistent when the activation energy was analysed as a function of time since disturbance and the activation energy systematically decreased in all treatments and all countries with time since disturbance (Figure 7). The photosynthetic activity did not modify the sensitivity of soil respiration to temperature (peak and amplitude factors from the sine-function not affected) (Figure 6b, c). However, the amplitude of the sine-function tended to be higher in France (Figure 6c). The parameters of soil moisture function (a and b) did not change the response of the model either (Figure 6d, e).
+Most of the between treatment and between sites variance was explained by the activation energy parameters of the model.
+The temperature sensitivity (Q10) values of SOM mineralization were consistently higher in Romania (2.9 in controls), followed by France (2.7) and Spain (2.5) (Figure S4), as well as the activation energy (Ea) parameter wiich as expected followed the same pattern as Q10 (Figure 6a, Figure S4). In general, the activation energy and Q10 values decreased with slash addition due to higher SOM quality compared with treatments in which slash was removed. This was especially evident in Spain for both thinning and clear-cut and in the clear treatment in France. The activation energy and Q10 in the treatments where slash was added did not differ from controls (Figure 6a, Figure S4). These results were consistent when the activation energy was analysed as a function of time since disturbance and the activation energy systematically decreased in all treatments and all countries with time since disturbance (Figure 7). Unaccounted processes related to photosynthetic activity did not seem to have a substantial impact on the variance of respiration, since posterior values for the amplitude parameter of the sine function were close to zero (Figure 6b, c). However, the amplitude of the sine-function tended to be higher in France (Figure 6c). The parameters of soil moisture function (a and b) did not explain a big part of the treatment and site related variance either (Figure 6d, e), since posteriors were substantially indistinguishable.  
+The scaling parameter $A$ (Figure S5) still seems needed to explain part of the variance in the measured respiration, even after normalizing the respiration for initial C stocks.
 
 ![Figure 6. Posteriors of the parameters from the parametric model varying as a function of treatments: (a) activation energy(Ea) for temperature, (b) peak and (c) amplitude parameters from the seasonality sine-function, (d) and (e) correspond to a and b parameters from the soil moisture function, all testing the effects on respiration. Ea constant over time. Red shades = France, green shades = Romania, blue shades = Spain](../Figures/posteriors_boxplots.png){width=60%}
 
-![Figure 7. Posteriors of the activation energy (Ea) parameter varying as a function of treatments and sampling year per country](../Figures/timeseries_Ea_timevariant.png){width=60%}
+![Figure 7. Posteriors of the activation energy (Ea) parameter varying as a function of treatments and sampling year per country](../Figures/timeseries_Ea_timevariant.png){width=90%}
 
 The variables that most variance explained of Q10 were N content and fungal to bacteria ratio and then number of trees, beta-xylosidases and soil temperature (Figure x).
 
-![Figure 8. Principal component regression between edaphic and ecological variables and temperature sensitivity (Q10) analysed by Partial least squares (PLS) regression (upper pannel). Variance decomposition of main variables explaining Q10 (lower pannel)](../Figures/Q10_PLS_biplot.png){width=60%}
+![Figure 8. partial least squares regression between edaphic and ecological variables and temperature sensitivity (Q10) (upper pannel). Variance decomposition of main variables explaining Q10 (lower pannel) based on the values of the regression coefficients](../Figures/Q10_PLS_biplot.png){width=60%}
 
 ## Machine learning variance decomposition: predicting respiration based on edaphic, ecological and enzymatic data
 
@@ -258,17 +299,31 @@ The variables that most variance explained of Q10 were N content and fungal to b
 ![Fit of the detailed random forest model (a) and variable importance of the same model (b) for enzymatic activities. Only the 20 variables explaining most variance are shown here.](../Figures/variance_decomposition_enzyme.png){width=50%}
 
 ## Model extrapolations
-
+Vulnerability to warming, expressed as an increase in mineralization in response to a 5&deg;C increase in average temperature, being a direct modeled consequence of temperature sensitivity, followed the pattern of the temperature sensitivity parameter.
 ![Sensitivity of the organic matter in different treatments to a 5&deg;C increase in temperature, expressed as increase in mineralization from the baseline temperature](../Figures/scenario_extrapolation.png){width=60%}
 
 
 # Discussion
-General paragraph
+## General paragraph
 
-Hydrologic leaching of dissolved and particulate carbon compounds can also be important outputs of C from the system (Davinson and Jansen 2006), that could explained the low carbon content in Romania (sandy soil with low retention capacity). 
+Hydrologic leaching of dissolved and particulate carbon compounds can also be important outputs of C from the system (Davinson and Jansen 2006), that could explained the low carbon content in Romania (sandy soil with low retention capacity).   
 
-### Role of temperature and moisture in decomposition (model description)
-Our model showed that soil temperature and moisture were able to explained more than 50% of variance in soil respiration. MORE REFS RELATED TO MODELS (Nissan et al 2023,etc.). Because phenologial patterns in deciduous species can affect sensitivity of soil respiration to temperature (Curiel-Yuste et al 2004), in this model we have also included a seasonality scaling. The seasonal scaling although apparently differentiated slightly between sites, it always presented very low amplitude posteriors, weighting on average only a 5% of the total measured respiration. It was more important in France (between 4.5% and 12.2%) and much less in Spain and Romania (between 2.0% and 3.2%). This is probably related to higher photosynthetic activity variation of Quercus pubescens growing in a Mediterranean climate in France. This would indicate higher changes in root respiration and proliferation that would in turn affect microbial communities. Because in the three study sites there were deciduous Quercus species, another explanation is that soil respiration could have been also affected by the deciduousness of the understorey vegetation (Curiel-Yuste 2004).
+The scaling parameter $A$ was still needed to explain some of the variance in respiration measured at the level of single experimental plots even after normalization by SOC stocks. This is likely because of the high variability in SOC content of soils
+
+## Role of temperature and moisture in decomposition 
+The process-based model showed that processes related to soil temperature and moisture were able to explained more than 50% of variance in soil respiration. MORE REFS RELATED TO MODELS (Nissan et al 2023,etc.). 
+
+### Temperature interactions
+Temperature-related processes, described mainly by the activation energy parameter which determines the temperature sensitivity of the decomposition process, seemed to be the most influential in explaining the between-treatment and between-site variance in decomposition.  
+
+### Relationships between organic matter charachteristics, inputs of C to the soil, and temperature sensitivity
+
+
+### Moisture interactions
+Moisture-related processes, described by the two parameters of the temperature scaling function, did not seem to explain much of the  between-treatment and between-site variability variance in decomposition, since posteriors were largely not differentiated by site and treatment.
+
+### Seasonal patterms
+Because phenological patterns in deciduous species can affect sensitivity of soil respiration to temperature (Curiel-Yuste et al 2004), in this model we have also included a seasonality scaling. The seasonal scaling although did not seem to differentiate between sites in the posteriors of both parameters (amplitude and yday of the year of peak), and it always presented very low amplitude posteriors, weighting on average only a 5% of the total measured respiration. It was more important in France (between 4.5% and 12.2%) and much less in Spain and Romania (between 2.0% and 3.2%). This is probably related to higher photosynthetic activity variation of Quercus pubescens growing in a Mediterranean climate in France. This would indicate higher changes in root respiration and proliferation that would in turn affect microbial communities. Because in the three study sites there were deciduous Quercus species, another explanation is that soil respiration could have been also affected by the deciduousness of the understorey vegetation (Curiel-Yuste 2004).
 
 ## Forest management effect on activation energy and sensitivity to temperature
 Generally, our results confirmed the hypothesis 1, since slash addition increased the respiration rates compared to the treatments where the slash was removed. Addition of slash created an artificial litter layer that buffered the effects over soil microclimatic conditions, and provided new habitat and food availability for soil organisms (Pérez-Izquierdo et al. in prep). These results indicate that increases in heterotrophic respiration due to an increment in organic matter availability by slash addition compensated for the decreases in autotrophic respiration and root-associated microbiota due to tree logging and soil disturbance (Borkhuu et al. 2015). Moreover, the strength of the response was also dependent on the forest, being more evident in Spain and France where the tree density was much higher than Romania. In Romania such a low density of trees together with a dense understory of grasses in all treatments might explain the lack of response and indicate high degree of resilience to perturbations. 
