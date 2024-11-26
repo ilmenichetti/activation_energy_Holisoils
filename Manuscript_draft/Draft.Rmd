@@ -20,6 +20,13 @@ header-includes:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+# Todo
+Remove the first year in Spain, add in M&M why :done, short discussion in M&M, should prob read more about moisture and temperature sensitivity interactions
+Add units
+E_a is not activation energy, add a paragraph about in in the methodology: done
+Change E_a to E_0: done
+Add in discussion something about why we chose this model: done, kind of, just two lines in M&M saying that we chose these because they were readily available, used often in soil science and fitting the purpose. I actually had no particular reason to go for Lloyd-Taylor over Arrhenius, and for Moyano it was just that it was readily available to me.
+
 # Abstract
 
 
@@ -59,7 +66,6 @@ The activity of extracellular enzymes involved in SOM decomposition was measured
 The same five soil cores used for chemical analyses were used to estimate soil microbial biomass. To do that, we extracted Phospholipid fatty acids (PLFAs) following Šnajdr et al. (2008). Lipids were extracted using approximately 1g of dry soil with a mixture of chloroform:methanol:phosphate buffer (1:2:0.8) and separated by solid-phase extraction cartridges (HyperSep Silica SPE columns 200 mg/3 mL, Thermo Fisher Scientific). PLFAs were eluted using 2 mL of methanol. The selected fractions underwent to mild alkaline methanolysis and the methyl esters of PLFAs were analyzed by gas chromatography-mass spectrometry (GC-MS; 450-GC, 240-MS ion trap detector, Varian, Walnut Creek, CA). In the polar PLFA fraction, fungal biomass was quantified based on 18:2ω6,9 (fungal PLFA) content; bacterial biomass (total bacterial PLFA) was quantified as a sum of i14:0, i15:0, a15:0, 16:1ω5, 16:1ω7, 16:1ω9, 10Me-16:0, i16:0, i17:0, a17:0, cy17:0, 17:0, 10Me-17:0, 18:1ω7, 10Me-18:0, cy19:0 (Actinomycetes 10Me-16:0, 10Me-17:0, 10Me-18:0, Gram-positive i14:0, i15:0, a15:0, i16:0, i17:0, a17:0 and Gram-negative 16:1ω7, 16:1ω9, 18:1ω7, cy17:0, cy19:0). The sum of all of the selected PLFAs together with 16:0 and 18:1w9 was used as an estimate of total microbial biomass (total PLFA). 
 
 
-
 ## Validation
 In order to ensure a robust validation, all models have been validated with a split approach, keeping two completely independent data sets (80% of the points for training and 20% validation). Given the size of the dataset, we considered this approach more reliable than any cross-validation approach.
 
@@ -73,7 +79,7 @@ $$
 Where the parameter $\sigma$ was defined as the variance of the whole dataset (0.27).
 All models were explaining the measured respiration normalized by SOC stocks in each experimental plot.
 
-## Parametric model, constant `E_a`
+## Parametric model, constant `E_0`
 We defined a parametric model to consider all the three effects on respiration we hypothesized. The first is the influence of temperature, then the influence of soil moisture, and then a seasonal component which is assumed to be roughly proportional to the interactions of autotrophic respiration (which we hypothesized following a seasonal pattern).
 Temperature and moisture scaling interact linearly, while seasonality was assumed additive:  
 $$
@@ -89,17 +95,19 @@ $$
 \xi_{moist(t,k)} = a_j \cdot \theta_{v}(t) - b_j \cdot (\theta_{v}(t))^2
 $$
 We assumed that the variability in moisture sensitivity is driven by treatments ($j$). 
-The prior distribution for the term $a$ was assumed as $\sim \mathcal{N}(3.11, 0.1)$ and for the term $b$ was assumed as $\sim \mathcal{N}(2.42, 0.1)$, utilizing as mean values the values in @SierraMueller and setting up conservatives standard deviations.
+The prior distribution for the term $a$ was assumed as $\sim \mathcal{N}(3.11, 0.1)$ and for the term $b$ was assumed as $\sim \mathcal{N}(2.42, 0.1)$, utilizing as mean values the values in @SierraMueller and setting up conservatives standard deviations. The choice of this particular function among others was motivated by its availability and relatively wide usage in soil science, given that due to the calibration process any function with a similar shape would have served the same purpose in this context.
 
 ### Temperature
 The temperature scaling function we utilized to define the relationship is the one defined by @Lloyd.1994l68 and it is derived from the original Arrhenius equation [Arrhenius.1889]:
 $$
-\xi_{temp(t,j)} = A_{k} \cdot e^{\frac{-Ea_j}{(T(t)+273.15)-T_0)}}
+\xi_{temp(t,j)} = A_{k} \cdot e^{\frac{-E_0_j}{(T(t)+273.15)-T_0)}}
 $$
-The two parameters $A_{k}$ and $E_a$ are represented by Bayesian priors.  
-For the temperature scaling we assumed that the activation energy term $E_a$ (which defines roughly the slope of the relationship) is driven by treatments ($j$) while the linear rescaling term $A_{k}$ is driven by the substrate at the single plot level ($k$). This is because substrate (organic matter) amount is usually highly variable in soil even at small spatial scales, while its quality, which defines its temperature sensitivity, is assumed to follow the inputs quality which are relatively uniform over each treatments.  
+The two parameters $A_{k}$ and $E_0$ are represented by Bayesian priors.  
+The $E_0$ parameter in Lloyd and Taylor is a semi-empirical parameter describing biological temperature sensitivity. it is very similar to $E_a$ in Arrhenius, but the latter has a clear physical interpretation tied to reaction energy barriers. The meaning of the  $E_0$ parameter in Lloyd and Taylor describes the same process, but it's not directly comparable in absolute terms with the $E_a$ parameter in Arrhenius and they are not strictly linearly proportional (they would be when fitting both to the same process, such as in this case, because of the calibration, but still they hjave different physical meanings).
+The choice of this particular function over an Arrhenius relationship was motivated by it being relatively common in soil science studies, and fitting our purpose in the same way.
+For the temperature scaling we assumed that the activation energy term $E_0$ (which defines roughly the slope of the relationship) is driven by treatments ($j$) while the linear rescaling term $A_{k}$ is driven by the substrate at the single plot level ($k$). This is because substrate (organic matter) amount is usually highly variable in soil even at small spatial scales, while its quality, which defines its temperature sensitivity, is assumed to follow the inputs quality which are relatively uniform over each treatments.  
 The effect of the rescaling term $A_{k}$ is included in the function for temperature scaling to keep the convention of the original formulation of the equation, but it could be brought outside since it just a linear interaction.  
-The prior distribution for the term $A$ was assumed as $\sim \mathcal{N}(300, 100)$ and for the term $E_a$ was assumed as $\sim \mathcal{N}(398.5, 50)$, utilizing as mean values the values  in @Lloyd.1994l68 and setting up conservatives standard deviations.
+The prior distribution for the term $A$ was assumed as $\sim \mathcal{N}(300, 100)$ and for the term $E_0$ was assumed as $\sim \mathcal{N}(398.5, 50)$, utilizing as mean values the values  in @Lloyd.1994l68 and setting up conservatives standard deviations.
 
 
 ### Seasonality
@@ -127,12 +135,14 @@ The rationale behind these choices is to offer two extremes to compare the fitne
 Once we calibrated our parametric model, we could test the consequences of an increase in temperature on decomposition by driving the model with the same dataset except temperature was increased by 5&deg;C. This resulted in a more immediate way of visualizing the impact of a different temperature sensitivity of organic material.
 
 
-## Parametric model, time-variant `E_a`
-In order to test the hypothesis of an eventual variation of the activation energy of the decomposing material over time without any assumption on the function of variation, we fitted a version of the model where the $E_a$ parameter was stratified in order to let it vary independently for each treatment ($j$) and year of sampling ($y$). Each sampling year corresponds to multiple measurements (which is necessary to obtain enough information to constrain the temperature function).
+## Parametric model, time-variant `E_0`
+In order to test the hypothesis of an eventual variation of the activation energy of the decomposing material over time without any assumption on the function of variation, we fitted a version of the model where the $E_0$ parameter was stratified in order to let it vary independently for each treatment ($j$) and year of sampling ($y$). Each sampling year corresponds to multiple measurements (which is necessary to obtain enough information to constrain the temperature function).
 
 $$
 \xi_{temp(t,j)} = A_{k} \cdot e^{\frac{-Ea_{j,y}}{(T(t)+273.15)-T_0)}}
 $$
+
+In this case we excluded the first year of sampling from the Spain site because this series is incomplete and was performed only in the autumn months, and this might introduce some biases in the analysis.
 
 
 ```{r, echo=FALSE}
@@ -274,9 +284,9 @@ Both in Spain and France, removal of slash decreased respiration rates, independ
 The two benchmark models were used to set expectations on a possible lower (linear model) and upper (random forest model) bound of the predictive capacity of the data used for the process-based model. As expected, the linear model had a much lower predictive capacity than the random forest model, but both showed that the data contained relevant information to predict soil respiration.
 ![Figure 4. Fit of the two benchmark machine learning models, linear (a) and random forest (b)](../Figures/fit_ML_validation.png){width=80%}
 
-The process-based model (constant $E_a$ over time) had, again as expected, a predictive power in between the two (but closer to the random forest model.)
+The process-based model (constant $E_0$ over time) had, again as expected, a predictive power in between the two (but closer to the random forest model.)
 
-![Figure 5. Fit of the parametric model,  constant `E_a`](../Figures/fit_model_validation.png){width=60%}
+![Figure 5. Fit of the parametric model,  constant `E_0`](../Figures/fit_model_validation.png){width=60%}
 
 
 ## Temperature sensitivity (Q10) and parametric model posteriors 
@@ -316,19 +326,18 @@ The process-based model showed that processes related to soil temperature and mo
 ### Temperature interactions
 Temperature-related processes, described mainly by the activation energy parameter which determines the temperature sensitivity of the decomposition process, seemed to be the most influential in explaining the between-treatment and between-site variance in decomposition.  
 
-
 ### Moisture interactions
 Moisture-related processes, described by the two parameters of the temperature scaling function, did not seem to explain much of the  between-treatment and between-site variability variance in decomposition, since posteriors were largely not differentiated by site and treatment.
 
-### Seasonal patterms
-Because phenological patterns in deciduous species can affect sensitivity of soil respiration to temperature (Curiel-Yuste et al 2004), in this model we have also included a seasonality scaling. The seasonal scaling although did not seem to differentiate between sites in the posteriors of both parameters (amplitude and yday of the year of peak), and it always presented very low amplitude posteriors, weighting on average only a 5% of the total measured respiration. It was more important in France (between 4.5% and 12.2%) and much less in Spain and Romania (between 2.0% and 3.2%). This is probably related to higher photosynthetic activity variation of Quercus pubescens growing in a Mediterranean climate in France. This would indicate higher changes in root respiration and proliferation that would in turn affect microbial communities. Because in the three study sites there were deciduous Quercus species, another explanation is that soil respiration could have been also affected by the deciduousness of the understorey vegetation (Curiel-Yuste 2004).
+### Seasonal patterns
+Because phenological patterns in deciduous species can affect sensitivity of soil respiration to temperature (Curiel-Yuste et al 2004), in this model we have also included a seasonality scaling. The seasonal scaling although did not seem to differentiate between sites in the posteriors of both parameters (amplitude and day of the year of peak), and it always presented very low amplitude posteriors, weighting on average only a 5% of the total measured respiration. It was more important in France (between 4.5% and 12.2%) and much less in Spain and Romania (between 2.0% and 3.2%). This is probably related to higher photosynthetic activity variation of Quercus pubescens growing in a Mediterranean climate in France. This would indicate higher changes in root respiration and proliferation that would in turn affect microbial communities. Because in the three study sites there were deciduous Quercus species, another explanation is that soil respiration could have been also affected by the deciduousness of the understorey vegetation (Curiel-Yuste 2004).
 
 ## Forest management effect on activation energy and sensitivity to temperature
 Generally, our results confirmed the hypothesis 1, since slash addition increased the respiration rates compared to the treatments where the slash was removed. Addition of slash created an artificial litter layer that buffered the effects over soil microclimatic conditions, and provided new habitat and food availability for soil organisms (Pérez-Izquierdo et al. in prep). These results indicate that increases in heterotrophic respiration due to an increment in organic matter availability by slash addition compensated for the decreases in autotrophic respiration and root-associated microbiota due to tree logging and soil disturbance (Borkhuu et al. 2015). Moreover, the strength of the response was also dependent on the forest, being more evident in Spain and France where the tree density was much higher than Romania. In Romania such a low density of trees together with a dense understory of grasses in all treatments might explain the lack of response and indicate high degree of resilience to perturbations. 
 
-Our results also confirmed the hypothesis 2, since addition of slash in general decreased the activation energy of SOM decomposition, particularly when in a clearc cut (which is already adding fresh inputs to the soil with residuals like leaves and branches falling to the ground as well as roots that start to decompose). We argue that this result is probably related to a reduction in chemical recalcitrance due to the increased amount of fresh C inputs, supporting the carbon quality-temperature hypothesis stating that the biochemically recalcitrant C pool is more sensitive to changes in temperature than the labile C pool [@Bosatta.1999], confirmed by other direct measurements [@Lefevre.2014]. A more recalcitrant substrate likely implies more biochemical steps for its decomposition, each step subjected to the same thermodynamic constraints. More steps in the overall oxydative reaction leading also implies a higher chance of one being more limited than the others due to the enzyme characteristics.
+Our results also confirmed the hypothesis 2, since addition of slash in general decreased the activation energy of SOM decomposition, particularly when in a clearcut (which is already adding fresh inputs to the soil with residuals like leaves and branches falling to the ground as well as roots that start to decompose). We argue that this result is probably related to a reduction in chemical recalcitrance due to the increased amount of fresh C inputs, supporting the carbon quality-temperature hypothesis stating that the biochemically recalcitrant C pool is more sensitive to changes in temperature than the labile C pool [@Bosatta.1999], confirmed by other direct measurements [@Lefevre.2014]. A more recalcitrant substrate likely implies more biochemical steps for its decomposition, each step subjected to the same thermodynamic constraints. More steps in the overall oxydative reaction leading also implies a higher chance of one being more limited than the others due to the enzyme characteristics.
 
-We have also observed a general negative trend of activation energy with time in all management disturbance treatments and all sites. This result also gives support to the C quality temperature hypothesis since fresh inputs from the new vegetation low down the temperature sensitivity of C mineralization as these inputs are more labile to decomposed (Lefevre et al 2014). Still, the growth of new vegetation, within three years from disturbance, did not compensate for the decreases in activation energies in the plots where removal of slash had an effect. Additionally, we cannot rule out the fact that other mechanisms could have contributed to low down activation energies with time such as differences between years in primary production (i.e., contribution of autotrophic respiration) or changes in substrate and enzyme diffusivity driven by differences in soil moisture between years (Davidson and Jansen 2022). In line with this, for example, in the control plots from Spain the activation energy decreased from year zero (2021) to year two (2023) and then it increased a bit, while in disturbed plots it was always descendant. Since changes in activation energy due to the growth of new vegetation is not expected in undisturbed control plots and given that 2022 and 2023 were extremely dry in Spain, probably drought exerted a constrained access of enzymes to substrates (Davinson and Jansen 2022). This suggest that drought effect may have similar impacts on temperature sensitivity as chemical recalcitrance.
+We have also observed a general negative trend of activation energy with time in all management disturbance treatments and all sites. This result also gives support to the C quality temperature hypothesis since fresh inputs from the new vegetation low down the temperature sensitivity of C mineralization as these inputs are more labile to decomposed (Lefevre et al 2014). Still, the growth of new vegetation, within three years from disturbance, did not compensate for the decreases in activation energies in the plots where removal of slash had an effect. Additionally, we cannot rule out the fact that other mechanisms could have contributed to low down activation energies with time such as differences between years in primary production (i.e., contribution of autotrophic respiration) or changes in substrate and enzyme diffusivity driven by differences in soil moisture between years (Davidson and Jansen 2022). In line with this, for example, in the control plots from Spain the activation energy decreased from year zero (2021) to year two (2023) and then it increased a bit, while in disturbed plots it was always descendant. Since changes in activation energy due to the growth of new vegetation is not expected in undisturbed control plots and given that 2022 and 2023 were extremely dry in Spain, probably drought exerted a constrained access of enzymes to substrates (Davidson and Jansen 2022). This suggest that drought effect may have similar impacts on temperature sensitivity as chemical recalcitrance.
 
 ## Role of edaphic, ecological and microbiological variables in temperature sensitivity
 The Q10 values obtained in our study were comparable to the Q10 values measured by other studies. Xu et al 2015 observed the largest relative frequency of Q10 values across forest in China was within the range of 2.0–3.0. Fierer et al. (2006) observed Q10 values ranging from 2.2 to 4.6 (average of 3.0) at continental-scale in an incubation experiment. Still, we observed a large variation of Q10 depending on the forest, being the highest in Romania. This is in agreement with the known higher temperature sensitivity in colder regions (Koven et al 2017). Longer time of frozen soils in Romania could have reduced the diffusion of substrates and extracellular enzymes within the soil (Davinson and Jansen 2006), giving higher values of Q10 not related to recalcitrance.   

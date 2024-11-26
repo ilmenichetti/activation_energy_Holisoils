@@ -238,13 +238,13 @@ for (j in 1:length(sites)) {
     treat_data <- data_site[data_site$treat == treatments[i], ]
 
     # Add the confidence interval bands (polygon)
-    polygon(c(treat_data$year, rev(treat_data$year)),
-            c(treat_data$CI_Upper, rev(treat_data$CI_Lower)),
+    polygon(c(treat_data[treat_data$year != 0,]$year, rev(treat_data[treat_data$year != 0,]$year)),
+            c(treat_data[treat_data$year != 0,]$CI_Upper, rev(treat_data[treat_data$year != 0,]$CI_Lower)),
             col = add.alpha(palette_treat[i+color_index], 0.25), border = NA)
 
     # Add the points and lines
-    points(treat_data$year, treat_data$Mean, col = palette_treat[i+color_index], pch = i)
-    lines(treat_data$year, treat_data$Mean, col = palette_treat[i+color_index])
+    points(treat_data[treat_data$year != 0,]$year, treat_data[treat_data$year != 0,]$Mean, col = palette_treat[i+color_index], pch = i)
+    lines(treat_data[treat_data$year != 0,]$year, treat_data[treat_data$year != 0,]$Mean, col = palette_treat[i+color_index])
   }
   color_index = color_index + 4
 

@@ -34,7 +34,7 @@ parameters {
 model {
   vector[N] model_resp;
   vector[N] xi_moist;
-  vector[N] xi_temp;
+  vector[N] xi_temp;+
   vector[N] sine_wave;
 
 
