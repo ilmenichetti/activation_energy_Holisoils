@@ -181,7 +181,7 @@ par(mfrow=c(1,2))
 E_0_densities_indA_Moy <- list()
 E_0_box_indA_Moy <- list()
 plot( density(post_bytreat_indA_Moy$Ea[,1]), xlim=c(range(post_bytreat_indA_Moy$Ea)[1]*0.9, range(post_bytreat_indA_Moy$Ea)[2]*1.1),
-      ylim=c(0,0.07), xlab = expression('E'[a]), col=NA, main="")
+      ylim=c(0,0.07), xlab = expression('E'[0]), col=NA, main="")
 for(i in 1:stan_data$Tr){
   E_0_densities_indA_Moy[[i]] <- density(post_bytreat_indA_Moy$Ea[,i])
   E_0_box_indA_Moy[[i]] <- E_0_densities_indA_Moy[[i]]$x

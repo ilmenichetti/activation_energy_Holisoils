@@ -46,7 +46,7 @@ boxplot(stan_data$resp ~ stan_data$treat_year)
 
 
 # define the number of runs of the MCMC
-N_RUNS = 5000
+N_RUNS = 6000
 
 # Determine the number of cores available
 num_cores <- detectCores()
@@ -230,7 +230,7 @@ for (j in 1:length(sites)) {
 
   # Create an empty plot
   plot(data_site$year, data_site$Mean, type = "n", ylim = yrange, xlim=c(0,3),
-       xlab = "Year", ylab = expression('E'[a]), main = paste(sites_plot_names[j]))
+       xlab = "Year", ylab = expression('E'[0]), main = paste(sites_plot_names[j]))
 
   # Loop over each treatment to add points, lines, and CI bands
   treatments <- unique(data_site$treat)

@@ -19,7 +19,7 @@ set.seed(123)
 
 # edaphics <- read.csv("edaphics.csv")
 #data <- read.csv("Database_co2_28_05_2024.csv")
-data <- read_xlsx("Database_co2_18_10_2024_format_Lorenzo.xlsx", sheet=1)
+data <- read_xlsx("Database_co2_26_11_2024_format_Lorenzo.xlsx", sheet=1)
 str(data)
 #soil_data <- read_xlsx("Soil_data_Lorenzo_03_09_2024_enzymes.xlsx", sheet=1)
 soil_data <- read_xlsx("Soil_data_Lorenzo_14_11_2024_enzymes.xlsx", sheet=1)
