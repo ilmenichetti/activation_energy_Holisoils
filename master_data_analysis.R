@@ -57,7 +57,19 @@ levels(data$treatment) <- c(
 )
 
 
-str(data)
+
+soil_data$treatment <-as.factor(soil_data$treatment)
+soil_data$treatment <- factor(soil_data$treatment, levels = c("control", "clear_cut_no_slash", "clear_cut_slash", "thinning_no_slash", "thinning_slash"))
+levels(soil_data$treatment)
+
+# Remap the factor levels
+levels(soil_data$treatment) <- c(
+  "control",            # "control" remains "control"
+  "CD100-slash",      # "clear_cut_no_slash" becomes "CD100 - slash"
+  "CD100+slash",      # "clear_cut_slash" becomes "CD100 + slash"
+  "CD50-slash",       # "thinning_no_slash" becomes "CD50 - slash"
+  "CD50+slash"        # "thinning_slash" becomes "CD50 + slash"
+)
 
 
 #####################

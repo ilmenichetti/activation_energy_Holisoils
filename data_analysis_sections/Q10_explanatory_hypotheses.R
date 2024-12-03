@@ -43,7 +43,20 @@ treatment_vector <- soil_data %>%
 treatment_vector = treatment_vector[ rownames(aggregated_soil_data) != "19.romania"]
 site_vector = site_vector[ rownames(aggregated_soil_data) != "19.romania"]
 
-treatment_vector <- as.factor(treatment_vector)
+# treatment_vector <- as.factor(treatment_vector)
+#
+# treatment_vector<- factor(treatment_vector, levels = c("control", "clear_cut_no_slash", "clear_cut_slash", "thinning_no_slash", "thinning_slash"))
+# levels(treatment_vector)
+#
+# # Remap the factor levels
+# levels(treatment_vector) <- c(
+#   "control",            # "control" remains "control"
+#   "CD100-slash",      # "clear_cut_no_slash" becomes "CD100 - slash"
+#   "CD100+slash",      # "clear_cut_slash" becomes "CD100 + slash"
+#   "CD50-slash",       # "thinning_no_slash" becomes "CD50 - slash"
+#   "CD50+slash"        # "thinning_slash" becomes "CD50 + slash"
+# )
+
 
 # correlation matrix
 names(aggregated_soil_data)
