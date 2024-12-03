@@ -43,6 +43,8 @@ treatment_vector <- soil_data %>%
 treatment_vector = treatment_vector[ rownames(aggregated_soil_data) != "19.romania"]
 site_vector = site_vector[ rownames(aggregated_soil_data) != "19.romania"]
 
+treatment_vector <- as.factor(treatment_vector)
+
 # correlation matrix
 names(aggregated_soil_data)
 

@@ -14,6 +14,12 @@ library(parallel)
 set.seed(123)
 
 
+#TODO: change the labels
+# control : control
+# thinning slush : CD50 + slash
+# thinning no slash: CD50 - slash
+# clear cut slash : CD100 + slahs
+# clear cut no slash : CD100 - slahs
 
 
 
@@ -22,7 +28,7 @@ set.seed(123)
 data <- read_xlsx("Database_co2_26_11_2024_format_Lorenzo.xlsx", sheet=1)
 str(data)
 #soil_data <- read_xlsx("Soil_data_Lorenzo_03_09_2024_enzymes.xlsx", sheet=1)
-soil_data <- read_xlsx("Soil_data_Lorenzo_14_11_2024_enzymes.xlsx", sheet=1)
+soil_data <- read_xlsx("Soil_data_Lorenzo_03_12_2024_enzymes.xlsx", sheet=1)
 
 
 data$treatment <- as.factor(data$treatment)
@@ -39,6 +45,17 @@ soil_data$date  <- as.Date(soil_data$date, format = "%d.%m.%Y")
 
 #rearrange the levels putting control first
 data$treatment <- factor(data$treatment, levels = c("control", "clear_cut_no_slash", "clear_cut_slash", "thinning_no_slash", "thinning_slash"))
+levels(data$treatment)
+
+# Remap the factor levels
+levels(data$treatment) <- c(
+  "control",            # "control" remains "control"
+  "CD100-slash",      # "clear_cut_no_slash" becomes "CD100 - slash"
+  "CD100+slash",      # "clear_cut_slash" becomes "CD100 + slash"
+  "CD50-slash",       # "thinning_no_slash" becomes "CD50 - slash"
+  "CD50+slash"        # "thinning_slash" becomes "CD50 + slash"
+)
+
 
 str(data)
 
@@ -188,6 +205,7 @@ processed_data_filtered_preprocess <- processed_data %>%
 dropped_levels<-levels(processed_data_filtered_preprocess$plot_id)[!levels(processed_data_filtered_preprocess$plot_id) %in% levels(droplevels(processed_data_filtered_preprocess$plot_id))]
 processed_data_filtered_preprocess$plot_id <- droplevels(processed_data_filtered_preprocess$plot_id)
 
+processed_data_filtered_preprocess$treatment
 
 # ************************************************************
 # ************** Site micrometeorology ******************

@@ -12,18 +12,18 @@ Q10_range = c(15,25)
 
 
 #reordering the treatments for plotting uniformity
-processed_data_filtered$treatment <- factor(processed_data_filtered$treatment, levels = c("control.france","thinning_slash.france","thinning_no_slash.france",
-                                                               "clear_cut_slash.france","clear_cut_no_slash.france",
-                                                               "control.romania","thinning_slash.romania", "thinning_no_slash.romania",
-                                                               "clear_cut_slash.romania","clear_cut_no_slash.romania",
-                                                               "control.spain","thinning_slash.spain", "thinning_no_slash.spain",
-                                                               "clear_cut_slash.spain","clear_cut_no_slash.spain"))
-validation_data$treatment <- factor(validation_data$treatment, levels = c("control.france","thinning_slash.france","thinning_no_slash.france",
-                                                                                          "clear_cut_slash.france","clear_cut_no_slash.france",
-                                                                                          "control.romania","thinning_slash.romania", "thinning_no_slash.romania",
-                                                                                          "clear_cut_slash.romania","clear_cut_no_slash.romania",
-                                                                                          "control.spain","thinning_slash.spain", "thinning_no_slash.spain",
-                                                                                          "clear_cut_slash.spain","clear_cut_no_slash.spain"))
+processed_data_filtered$treatment <- factor(processed_data_filtered$treatment, levels = c("control.france","CD50+slash.france","CD50-slash.france",
+                                                               "CD100+slash.france","CD100-slash.france",
+                                                               "control.romania","CD50+slash.romania", "CD50-slash.romania",
+                                                               "CD100+slash.romania","CD100-slash.romania",
+                                                               "control.spain","CD50+slash.spain", "CD50-slash.spain",
+                                                               "CD100+slash.spain","CD100-slash.spain"))
+validation_data$treatment <- factor(validation_data$treatment, levels = c("control.france","CD50+slash.france","CD50-slash.france",
+                                                                                          "CD100+slash.france","CD100-slash.france",
+                                                                                          "control.romania","CD50+slash.romania", "CD50-slash.romania",
+                                                                                          "CD100+slash.romania","CD100-slash.romania",
+                                                                                          "control.spain","CD50+slash.spain", "CD50-slash.spain",
+                                                                                          "CD100+slash.spain","CD100-slash.spain"))
 
 # Data list for Stan
 stan_data <- list(N = length(processed_data_filtered$CO2_flux_norm),
@@ -278,9 +278,9 @@ dev.off()
 
 levels(processed_data_filtered$treatment)
 
-names_treats <- c( "control France", "thin slash France"," thin no-slash France",  "CC slash France", "CC no-slash France",
-                   "control Romania",  "thin slash Romania","thin no-slash Romania",  "CC slash Romania", "CC no-slash Romania",
-                   "control Spain", "thin slash Spain",  " thin no-slash Spain",  "CC slash Spain","CC no-slash Spain" )
+names_treats <- c( "control France", "CD50+slash France"," CD50-slah France",  "CD100+slah France", "CD100-slah France",
+                   "control Romania",  "CD50+slah Romania","CD50-slah Romania",  "CD100+slah Romania", "CD100-slah Romania",
+                   "control Spain", "CD50+slah Spain",  " CD50-slah Spain",  "CD100+slah Spain","CD100-slah Spain" )
 
 
 angle_palette = rep(c(180, 45, NA, 45, NA), 3)
