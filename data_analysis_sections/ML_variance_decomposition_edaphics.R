@@ -1,5 +1,8 @@
 
 names(soil_data)
+
+units = read.x
+
 predictor_list = c("No_trees_ha", "Mean_DBH", "Basal_area", "treatment" ,
                    "pH","bulk_den", "phosphorous","Ntot","C_stocks","fungi_biomass",
                    "bacteria_biomass","actinobacteria_biomass","gram_pos_biomass","gram_neg_biomass","total_biomass","fungi_bact_rate","CO2_flux_norm",

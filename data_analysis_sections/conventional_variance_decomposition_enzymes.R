@@ -14,40 +14,55 @@ calc_ci <- function(data) {
 
 
 plot_names = colnames(soil_data)[30:44]
+
 # reorder the plots
 interaction_levels <- with(soil_data, interaction(treatment, site))
+levels(interaction_levels)
 reordered_interaction <- factor(interaction_levels, levels = c("control.france","thinning_slash.france","thinning_no_slash.france",
                                                                "clear_cut_slash.france","clear_cut_no_slash.france",
                                                                "control.romania","thinning_slash.romania", "thinning_no_slash.romania",
                                                                "clear_cut_slash.romania","clear_cut_no_slash.romania",
                                                                "control.spain","thinning_slash.spain", "thinning_no_slash.spain",
-                                                               "clear_cut_slash.spain","clear_cut_no_slash.spain"
-))
+                                                               "clear_cut_slash.spain","clear_cut_no_slash.spain")
+                                                                )
+new_levels = c("control.france","CD50+slash.france","CD50-slash.france",
+           "CD100+slash.france","CD100-slash.france",
+           "control.romania","CD50+slash.romania", "CD50-slash.romania",
+           "CD100+slash.romania","CD100-slash.romania",
+           "control.spain","CD50+slash.spain", "CD50-slash.spain",
+           "CD100+slash.spain","CD100-slash.spain")
+
+levels(reordered_interaction) <- new_levels
 
 
 enzyme_means_table = mat.or.vec( length(unique(interaction(soil_data$treatment, soil_data$site))), length(plot_names))
 colnames(enzyme_means_table) = plot_names
 rownames(enzyme_means_table) = levels(reordered_interaction)
 
+
+soil_data_units$Variable[soil_data_units$Variable == "chitinase"] = "chitise"
+
 png("./Figures/enzymes_boxplots.png", height=4000, width = 5000, res = 300)
-par(mar=c(14,5,1,1), mfrow=c(4,4))
+par(mar=c(10,5,1,1), mfrow=c(4,4))
 for (i in 1:length(plot_names)) {
 
   name = plot_names[i]
 
 
-  boxplot(soil_data[[name]] ~ reordered_interaction, xlab="", ylab="",
+  unit = soil_data_units[soil_data_units$Variable == name,]$Units
+  boxplot(soil_data[[name]] ~ reordered_interaction, xlab="", ylab=unit,
           col = palette_treat,
           las = 2,
           main = paste(name))
 
 
   # Perform ANOVA
-  anova_model <- aov(soil_data[[name]] ~ reordered_interaction)
+  reordered_interaction_aov <- gsub("-", "~", reordered_interaction)
+  anova_model <- aov(soil_data[[name]] ~ reordered_interaction_aov)
 
   # Get the means and confidence intervals for each group
   means_table <- aggregate(soil_data[[name]],
-                           by = list(interaction(soil_data$treatment, soil_data$site)),
+                           by = list(reordered_interaction),
                            FUN = mean)
   colnames(means_table) <- c("Group", "Mean")
 
@@ -71,6 +86,7 @@ for (i in 1:length(plot_names)) {
   # Extract letter groupings using multcompLetters from the ANOVA model
   group_letters <- multcompLetters(TukeyHSD(anova_model)$reordered_interaction[, "p adj"])$Letters
   group_letters <- data.frame(Group = names(group_letters), group_letters)
+  group_letters$Group <- gsub("~", "-", group_letters$Group)
 
   # Merge means and CI into one table
   combined_table <- merge(means_table, ci_table,  by = "Group")
@@ -120,22 +136,23 @@ str(edaphic_means_table)
 edaphic_means_table[,9]
 
 png("./Figures/edaphic_boxplots.png", height=3000, width = 4000, res = 300)
-par(mar=c(14,5,1,1), mfrow=c(3,3))
+par(mar=c(10,5,1,1), mfrow=c(3,3))
 for (i in 1:length(plot_names_edaphic)) {
 
   name = plot_names_edaphic[i]
 
-  boxplot(soil_data[[name]] ~ reordered_interaction, xlab="", ylab="",
+  unit = soil_data_units[soil_data_units$Variable == name,]$Units
+  boxplot(soil_data[[name]] ~ reordered_interaction, xlab="", ylab=unit,
           col = palette_treat,
           las = 2,
           main = paste(name))
 
   # Perform ANOVA
-  anova_model <- aov(soil_data[[name]] ~ reordered_interaction)
+  anova_model <- aov(soil_data[[name]] ~ reordered_interaction_aov)
 
   # Get the means and confidence intervals for each group
   means_table <- aggregate(soil_data[[name]],
-                           by = list(interaction(soil_data$treatment, soil_data$site)),
+                           by = list(reordered_interaction),
                            FUN = function(x) mean(x, na.rm = TRUE))
   colnames(means_table) <- c("Group", "Mean")
   means_table$Group <- factor(means_table$Group, levels = levels(reordered_interaction))
@@ -166,6 +183,7 @@ for (i in 1:length(plot_names_edaphic)) {
   # Merge means and CI into one table
   combined_table <- merge(means_table, ci_table,  by = "Group")
   combined_table <- merge(combined_table, group_letters,  by = "Group", all.x = TRUE)
+  group_letters$Group <- gsub("~", "-", group_letters$Group)
 
   # Add the groupings to the combined table
   colnames(combined_table)[5] ="Grouping"
