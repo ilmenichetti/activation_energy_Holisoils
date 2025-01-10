@@ -47,13 +47,22 @@ par(mar=c(10,5,1,1), mfrow=c(4,4))
 for (i in 1:length(plot_names)) {
 
   name = plot_names[i]
+  name_plot = plot_names[i]
 
+  if(name_plot == "chitise"){name_plot = "chitinase"}
+  if(name_plot == "beta_gluco"){name_plot = "beta-glucosidase"}
+  if(name_plot == "beta_xylo"){name_plot = "beta-xylosidase"}
+  if(name_plot == "alpha_gluco"){name_plot = "alpha-glucosidase"}
+  if(name_plot == "beta_galacto"){name_plot = "beta-galactosidase"}
+  if(name_plot == "fungi_bact_rate"){name_plot = "fungi/bacteria_rate"}
+
+  name_plot = gsub("_", " ", name_plot)
 
   unit = soil_data_units[soil_data_units$Variable == name,]$Units
   boxplot(soil_data[[name]] ~ reordered_interaction, xlab="", ylab=unit,
           col = palette_treat,
           las = 2,
-          main = paste(name))
+          main = paste(name_plot))
 
 
   # Perform ANOVA
@@ -141,11 +150,18 @@ for (i in 1:length(plot_names_edaphic)) {
 
   name = plot_names_edaphic[i]
 
+  name_plot = plot_names_edaphic[i]
+  if(name_plot == "bulk_den"){name_plot = "bulk_density"}
+  if(name_plot == "Ntot"){name_plot = "N_tot"}
+  if(name_plot == "Ctot"){name_plot = "C_tot"}
+  name_plot = gsub("_", " ", name_plot)
+
+
   unit = soil_data_units[soil_data_units$Variable == name,]$Units
   boxplot(soil_data[[name]] ~ reordered_interaction, xlab="", ylab=unit,
           col = palette_treat,
           las = 2,
-          main = paste(name))
+          main = paste(name_plot))
 
   # Perform ANOVA
   anova_model <- aov(soil_data[[name]] ~ reordered_interaction_aov)
